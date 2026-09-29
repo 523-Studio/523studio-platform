@@ -13,8 +13,8 @@ use App\Models\Notification;
 use App\Models\User;
 use App\Support\ContentComplexityCalculator;
 use App\Support\WorkflowTransitions;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Carbon;
 
 class DelayRiskPredictionService
@@ -23,7 +23,7 @@ class DelayRiskPredictionService
 
     /**
      * @return int Jumlah item yang berhasil dapat skor baru (dipakai RecomputeDelayRiskScores
-     * untuk deteksi kalau pipeline prediksi rusak masal, lihat callPredictScript()).
+     * untuk deteksi kalau pipeline prediksi rusak masal, lihat callPredictApi()).
      */
     public function predictForItems(array $contentItemIds): int
     {
@@ -47,7 +47,7 @@ class DelayRiskPredictionService
             $payloadItems[] = array_merge(['content_item_id' => $item->id], $features);
         }
 
-        $results = $this->callPredictScript($payloadItems);
+        $results = $this->callPredictApi($payloadItems);
 
         // Ambil snapshot fitur sebelumnya PER ITEM sebelum row baru dibuat, biar
         // guessTopFactor() bisa jelasin apa yang BERUBAH, bukan cuma ambang statis.
@@ -151,33 +151,25 @@ class DelayRiskPredictionService
         ];
     }
 
-    private function callPredictScript(array $items): array
+    private function callPredictApi(array $items): array
     {
-        $scriptPath = storage_path('ai/delay_risk/predict_batch.py');
-        $modelPath = storage_path('ai/delay_risk/delay_risk_model.pkl');
+        $url = config('services.delay_risk.url');
 
-        if (! file_exists($modelPath)) {
-            Log::error("Delay Risk prediction dibatalkan: model file tidak ditemukan di {$modelPath}");
+        if (! $url) {
+            Log::error('Delay Risk prediction dibatalkan: DELAY_RISK_API_URL belum di-set');
             return [];
         }
 
-        $payload = json_encode(['items' => $items]);
+        $response = Http::withHeaders(['X-Api-Key' => config('services.delay_risk.key')])
+            ->timeout(30)
+            ->post($url, ['items' => $items]);
 
-        // "python3" tidak selalu ada di PATH - di Windows/beberapa environment
-        // dev cuma ada "python". PYTHON_BIN di .env bisa override kalau perlu.
-        $pythonBin = env('PYTHON_BIN', PHP_OS_FAMILY === 'Windows' ? 'python' : 'python3');
-
-        // Bentuk array (bukan string command) supaya path yang mengandung
-        // spasi/tanda kurung (umum di direktori proyek Windows) tidak perlu
-        // di-quote manual dan tidak salah di-parse oleh shell.
-        $result = Process::input($payload)->run([$pythonBin, $scriptPath]);
-
-        if (!$result->successful()) {
-            Log::error('Delay Risk prediction script failed', ['error' => $result->errorOutput()]);
+        if ($response->failed()) {
+            Log::error('Delay Risk prediction API failed', ['error' => $response->body()]);
             return [];
         }
 
-        $decoded = json_decode($result->output(), true) ?? [];
+        $decoded = $response->json() ?? [];
 
         return $this->filterValidResults($decoded);
     }

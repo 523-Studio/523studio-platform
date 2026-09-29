@@ -11,6 +11,12 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+// Shared hosting (Hostinger) tidak punya proses latar belakang permanen
+// (Supervisor) - queue didorong lewat cron schedule:run tiap menit sebagai
+// gantinya, --stop-when-empty supaya proses keluar begitu antrean kosong
+// alih-alih jalan terus dan bentrok dengan invocation menit berikutnya.
+Schedule::command('queue:work --stop-when-empty')->everyMinute();
+
 Schedule::command('analytics:detect-anomalies')->hourly();
 
 Schedule::command(RecomputeDelayRiskScores::class)->dailyAt('10:00');
@@ -91,11 +97,9 @@ Schedule::command('analytics:prune-content-metric-snapshots')
 //    kalau ada cron/Windows Task Scheduler yang memanggil `php artisan
 //    schedule:run` tiap menit - belum ada di lingkungan dev ini (dicek
 //    langsung, tidak ada Task Scheduler entry apapun untuk project ini).
-// 2. Job SyncInstagramAnalyticsJob di atas cuma akan diproses kalau ada
-//    `php artisan queue:work` (atau setara) yang jalan terus-menerus.
-//    QUEUE_CONNECTION=database sudah dikonfigurasi tapi belum pernah ada
-//    worker aktif di project ini sebelum fitur ini dibuat.
-// Rekomendasi produksi: jalankan queue:work via process manager (Supervisor/
-// NSSM), ATAU tambahkan `Schedule::command('queue:work --stop-when-empty')
-// ->everyMinute()` di sini kalau tidak mau proses worker terpisah - tapi
-// tetap butuh poin 1 di atas supaya schedule:run sendiri terpicu.
+// 2. Job SyncInstagramAnalyticsJob di atas diproses lewat baris
+//    `queue:work --stop-when-empty` di awal file ini (dipicu cron yang sama
+//    dengan poin 1, bukan proses worker terpisah) - dipilih karena shared
+//    hosting produksi (Hostinger) tidak punya process manager (Supervisor).
+//    Kalau pindah ke environment yang punya Supervisor/NSSM, baris itu boleh
+//    diganti proses worker permanen untuk latency lebih rendah.

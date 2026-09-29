@@ -45,6 +45,15 @@ return [
         'api_key' => env('GEMINI_API_KEY'),
     ],
 
+    // API terpisah (FastAPI, lihat services/delay-risk-api/) yang menjalankan
+    // model scikit-learn buat prediksi delay risk. Dipanggil dari
+    // DelayRiskPredictionService lewat HTTP, bukan proses lokal - lihat
+    // services/delay-risk-api/render.yaml untuk target deploy-nya.
+    'delay_risk' => [
+        'url' => env('DELAY_RISK_API_URL'),
+        'key' => env('DELAY_RISK_API_KEY'),
+    ],
+
     // Global Meta App credentials doang - token milik masing-masing client
     // TIDAK disimpan di sini, cuma di api_integrations.access_token
     // (encrypted, per client) hasil OAuth connect.
