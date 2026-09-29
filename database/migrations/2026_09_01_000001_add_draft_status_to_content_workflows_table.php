@@ -10,13 +10,13 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration {
     public function up(): void
     {
-        DB::statement('ALTER TABLE `content_workflows` DROP CHECK `chk_content_workflows_current_status`');
+        DB::statement('ALTER TABLE `content_workflows` DROP CONSTRAINT `chk_content_workflows_current_status`');
         DB::statement("ALTER TABLE `content_workflows` ADD CONSTRAINT `chk_content_workflows_current_status` CHECK (`current_status` IN ('draft','brief_ready','in_progress','waiting_review','revision','approved','scheduled','uploaded','cancelled'))");
     }
 
     public function down(): void
     {
-        DB::statement('ALTER TABLE `content_workflows` DROP CHECK `chk_content_workflows_current_status`');
+        DB::statement('ALTER TABLE `content_workflows` DROP CONSTRAINT `chk_content_workflows_current_status`');
         DB::statement("ALTER TABLE `content_workflows` ADD CONSTRAINT `chk_content_workflows_current_status` CHECK (`current_status` IN ('brief_ready','in_progress','waiting_review','revision','approved','scheduled','uploaded','cancelled'))");
     }
 };
