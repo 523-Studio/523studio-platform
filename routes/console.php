@@ -17,6 +17,13 @@ Artisan::command('inspire', function () {
 // alih-alih jalan terus dan bentrok dengan invocation menit berikutnya.
 Schedule::command('queue:work --stop-when-empty')->everyMinute();
 
+// services/delay-risk-api/ di-host di PythonAnywhere free tier, yang
+// nonaktifkan web app-nya kalau tidak ada yang login & reactivate berkala.
+// Dua lapis jaring pengaman: reminder bulanan (proaktif) + health-check
+// harian (reaktif, sadar duluan kalau reminder kelewat).
+Schedule::command('delay-risk-api:remind-renewal')->monthlyOn(1, '09:00');
+Schedule::command('delay-risk-api:health-check')->daily();
+
 Schedule::command('analytics:detect-anomalies')->hourly();
 
 Schedule::command(RecomputeDelayRiskScores::class)->dailyAt('10:00');

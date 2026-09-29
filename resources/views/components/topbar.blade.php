@@ -11,6 +11,8 @@
         'deadline_reminder' => ['icon' => 'schedule', 'bg' => 'bg-[var(--info-tint)]', 'color' => 'text-[var(--info-text)]'],
         'overdue_reminder' => ['icon' => 'warning', 'bg' => 'bg-[var(--danger-tint)]', 'color' => 'text-[var(--danger-text)]'],
         'delay_risk_alert' => ['icon' => 'report', 'bg' => 'bg-[var(--danger-tint)]', 'color' => 'text-[var(--danger-text)]'],
+        'pythonanywhere_renewal_reminder' => ['icon' => 'login', 'bg' => 'bg-[var(--info-tint)]', 'color' => 'text-[var(--info-text)]'],
+        'delay_risk_api_down' => ['icon' => 'cloud_off', 'bg' => 'bg-[var(--danger-tint)]', 'color' => 'text-[var(--danger-text)]'],
     ];
 
     $tabs = ['all' => 'All', 'delay_risk_alert' => 'Risk Alerts', 'task' => 'Tasks', 'ai_insight' => 'AI Insights'];

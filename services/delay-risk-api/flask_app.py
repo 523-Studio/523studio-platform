@@ -2,8 +2,7 @@ import os
 
 import joblib
 import pandas as pd
-from fastapi import FastAPI, Header, HTTPException
-from pydantic import BaseModel
+from flask import Flask, jsonify, request
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "delay_risk_model.pkl")
 API_KEY = os.environ.get("DELAY_RISK_API_KEY")
@@ -18,31 +17,31 @@ FEATURE_COLUMNS = [
     "days_in_current_status",
 ]
 
-app = FastAPI()
+# PythonAnywhere mengimpor `app` dari file ini sebagai WSGI application
+# (lihat file WSGI config yang di-generate otomatis saat setup web app Flask
+# di tab Web hPanel PythonAnywhere).
+app = Flask(__name__)
 _model = None
 
 
 def get_model():
     # Load sekali per proses (bukan per request) - joblib.load() bukan operasi
-    # murah, dan proses uvicorn ini tetap hidup antar-request selama belum tidur.
+    # murah, dan proses WSGI worker ini tetap hidup antar-request.
     global _model
     if _model is None:
         _model = joblib.load(MODEL_PATH)
     return _model
 
 
-class PredictRequest(BaseModel):
-    items: list[dict]
+@app.route("/predict", methods=["POST"])
+def predict():
+    if API_KEY and request.headers.get("X-Api-Key") != API_KEY:
+        return jsonify({"detail": "Invalid API key"}), 401
 
-
-@app.post("/predict")
-def predict(payload: PredictRequest, x_api_key: str | None = Header(default=None)):
-    if API_KEY and x_api_key != API_KEY:
-        raise HTTPException(status_code=401, detail="Invalid API key")
-
-    items = payload.items
+    payload = request.get_json(silent=True) or {}
+    items = payload.get("items", [])
     if not items:
-        return []
+        return jsonify([])
 
     df = pd.DataFrame(items)
     X = df[FEATURE_COLUMNS]
@@ -66,9 +65,9 @@ def predict(payload: PredictRequest, x_api_key: str | None = Header(default=None
             "risk_level": level,
         })
 
-    return results
+    return jsonify(results)
 
 
-@app.get("/health")
+@app.route("/health")
 def health():
-    return {"status": "ok"}
+    return jsonify({"status": "ok"})

@@ -7,7 +7,8 @@ scikit-learn==1.6.1
 joblib==1.5.2
 pandas==2.3.3
 
-# fastapi & uvicorn tidak terikat ke format model manapun, aman dibiarkan
-# ambil versi stabil terbaru.
-fastapi
-uvicorn[standard]
+# Flask tidak terikat ke format model manapun, aman dibiarkan ambil versi
+# stabil terbaru. Dipilih di atas FastAPI karena PythonAnywhere free tier
+# cuma support WSGI (Flask/Django) secara stabil - ASGI/FastAPI masih
+# experimental di sana.
+flask

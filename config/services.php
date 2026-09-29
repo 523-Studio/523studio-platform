@@ -45,10 +45,13 @@ return [
         'api_key' => env('GEMINI_API_KEY'),
     ],
 
-    // API terpisah (FastAPI, lihat services/delay-risk-api/) yang menjalankan
+    // API terpisah (Flask, lihat services/delay-risk-api/) yang menjalankan
     // model scikit-learn buat prediksi delay risk. Dipanggil dari
-    // DelayRiskPredictionService lewat HTTP, bukan proses lokal - lihat
-    // services/delay-risk-api/render.yaml untuk target deploy-nya.
+    // DelayRiskPredictionService lewat HTTP, bukan proses lokal - deploy di
+    // PythonAnywhere (free tier, WSGI-only, lihat CheckDelayRiskApiHealth &
+    // RemindPythonAnywhereRenewal untuk kenapa perlu health-check + reminder
+    // manual: free tier PythonAnywhere nonaktif kalau tidak ada yang login
+    // berkala).
     'delay_risk' => [
         'url' => env('DELAY_RISK_API_URL'),
         'key' => env('DELAY_RISK_API_KEY'),
