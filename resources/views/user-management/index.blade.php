@@ -21,7 +21,7 @@
         <div>
             <h1 class="font-display text-[26px] sm:text-[32px] font-semibold text-[var(--text-primary)]">Kelola Pengguna</h1>
             <p class="text-[var(--text-secondary)] text-sm mt-1">
-                Roster staf internal agensi - real dari Content Planner, lengkap dengan role dan status akses dashboard. Tidak semua staf punya akses login.
+                Kelola siapa saja yang punya akses ke dashboard ini. Akun harus didaftarkan di sini dulu sebelum orang tersebut bisa login.
             </p>
         </div>
 
