@@ -97,7 +97,7 @@
             <div class="relative">
                 <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-[15px] pointer-events-none">calendar_month</span>
                 <input id="scheduled_upload_at" type="text" x-model="scheduledUploadAt" data-flatpickr="datetime" autocomplete="off" :disabled="{{ $canUpdateWorkflow ? 'false' : 'true' }}"
-                    class="w-full border border-[var(--border)] rounded-lg pl-8 pr-3 py-2 text-xs focus:outline-none focus:border-[#044b46]/40 disabled:bg-[var(--surface-page)] disabled:text-[var(--text-muted)]">
+                    class="bg-[var(--surface-card)] w-full border border-[var(--border)] rounded-lg pl-8 pr-3 py-2 text-xs focus:outline-none focus:border-[#044b46]/40 disabled:bg-[var(--surface-page)] disabled:text-[var(--text-muted)]">
             </div>
         </div>
         <button type="button" :disabled="{{ $canUpdateWorkflow ? 'false' : 'true' }} || !scheduledUploadAt"

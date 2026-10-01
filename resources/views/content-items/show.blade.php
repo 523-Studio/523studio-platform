@@ -170,18 +170,18 @@
                                     <label for="info-title" class="block text-[10px] font-medium text-[var(--text-muted)] uppercase mb-1">Judul</label>
                                     <input id="info-title" type="text" name="title" required value="{{ old('title', $hasBasicInfo ? $contentItem->title : '') }}"
                                         placeholder="Judul konten..."
-                                        class="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#044b46]/40">
+                                        class="bg-[var(--surface-card)] w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#044b46]/40">
                                 </div>
                                 <div>
                                     <label for="info-brief" class="block text-[10px] font-medium text-[var(--text-muted)] uppercase mb-1">Brief Singkat</label>
                                     <textarea id="info-brief" name="brief" rows="3" placeholder="Gambaran singkat konten ini..."
-                                        class="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#044b46]/40">{{ old('brief', $contentItem->brief) }}</textarea>
+                                        class="bg-[var(--surface-card)] w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#044b46]/40">{{ old('brief', $contentItem->brief) }}</textarea>
                                 </div>
                                 <div>
                                     <label for="info-reference" class="block text-[10px] font-medium text-[var(--text-muted)] uppercase mb-1">Referensi <span class="normal-case text-[var(--text-muted)]">(opsional)</span></label>
                                     <input id="info-reference" type="url" name="reference_link" value="{{ old('reference_link', $contentItem->reference_link) }}"
                                         placeholder="Link konten orang lain sebagai referensi/inspirasi..."
-                                        class="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#044b46]/40">
+                                        class="bg-[var(--surface-card)] w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#044b46]/40">
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
@@ -513,9 +513,9 @@
                         @php
                             $latestRisk = $contentItem->delayRiskScores->first();
                             $riskColors = [
-                                'high' => ['bg' => '#fdf2f1', 'text' => '#b3423e', 'label' => 'Risiko Tinggi'],
-                                'medium' => ['bg' => '#fdf6ec', 'text' => '#8a6423', 'label' => 'Risiko Sedang'],
-                                'low' => ['bg' => '#f0f5f4', 'text' => '#0f7a5f', 'label' => 'Risiko Rendah'],
+                                'high' => ['bg' => 'var(--danger-tint)', 'text' => 'var(--danger-text)', 'label' => 'Risiko Tinggi'],
+                                'medium' => ['bg' => 'var(--warning-tint)', 'text' => 'var(--warning-text)', 'label' => 'Risiko Sedang'],
+                                'low' => ['bg' => 'var(--success-tint)', 'text' => 'var(--success-text)', 'label' => 'Risiko Rendah'],
                             ];
                             $riskColor = $riskColors[$latestRisk->risk_level] ?? $riskColors['low'];
                         @endphp

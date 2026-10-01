@@ -8,6 +8,17 @@
     $scenesForDisplay = $contentBrief?->scenes_for_display ?? [];
     $canEdit = auth()->user()->hasPermissionTo('content_plan', 'create');
     $isLocked = $contentBrief?->isLocked() ?? false;
+
+    // Dipindah ke sini (bukan cuma di dalam blok "kalau feasibility_level
+    // ada") supaya bg kartu Kelayakan AI ikut berubah sesuai level alih-alih
+    // selalu biru info-tint - biru+teks merah/kuning sebelumnya bentrok dan
+    // menyakitkan mata di dark mode.
+    $feasibilityMeta = match ($contentBrief?->feasibility_level) {
+        'critical' => ['icon' => 'error', 'text' => 'var(--danger-text)', 'tint' => 'var(--danger-tint)', 'label' => 'Risiko Tinggi'],
+        'warning' => ['icon' => 'warning', 'text' => 'var(--warning-text)', 'tint' => 'var(--warning-tint)', 'label' => 'Perlu Diperhatikan'],
+        'ok' => ['icon' => 'check_circle', 'text' => 'var(--success-text)', 'tint' => 'var(--success-tint)', 'label' => 'Jadwal Aman'],
+        default => ['icon' => 'check_circle', 'text' => 'var(--info-text)', 'tint' => 'var(--info-tint)', 'label' => 'Jadwal Aman'],
+    };
 @endphp
 
 <div class="card p-6 border border-[#044b46]/15" x-data="{ editing: {{ $contentBrief ? 'false' : 'true' }} }">
@@ -152,7 +163,7 @@
                         <p class="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style="color: var(--danger-text);">
                             Deadline Sudah Lewat {{ $daysOverdue }} Hari
                         </p>
-                        <p class="text-sm mb-3" style="color: var(--danger-text);">
+                        <p class="text-sm mb-3" style="color: var(--text-primary);">
                             Pilih tanggal upload manual di bawah supaya keterlambatannya tercatat di Team Performance.
                         </p>
                         @if ($canEdit)
@@ -183,22 +194,15 @@
                  sebenarnya saling terkait (kompleksitas adalah salah satu
                  input penilaian kelayakan), jadi ditampilkan sebagai satu
                  kartu, muncul setelah brief-nya ada isinya. --}}
-            <div class="card p-5 bg-[var(--info-tint)] border-0 mb-2">
+            <div class="card p-5 border-0 mb-2" style="background-color: {{ $feasibilityMeta['tint'] }};">
                 @if ($contentBrief->feasibility_level)
-                    @php
-                        $feasibilityMeta = match ($contentBrief->feasibility_level) {
-                            'critical' => ['icon' => 'error', 'text' => 'var(--danger-text)', 'label' => 'Risiko Tinggi'],
-                            'warning' => ['icon' => 'warning', 'text' => 'var(--warning-text)', 'label' => 'Perlu Diperhatikan'],
-                            default => ['icon' => 'check_circle', 'text' => 'var(--success-text)', 'label' => 'Jadwal Aman'],
-                        };
-                    @endphp
-                    <div class="flex items-start gap-2.5 pb-4 mb-4 border-b border-[#0f7a5f]/10">
+                    <div class="flex items-start gap-2.5 pb-4 mb-4 border-b border-[var(--border)]">
                         <span class="material-symbols-outlined text-[17px] shrink-0 mt-0.5" style="color: {{ $feasibilityMeta['text'] }};">{{ $feasibilityMeta['icon'] }}</span>
                         <div>
                             <p class="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style="color: {{ $feasibilityMeta['text'] }};">
                                 Cek Kelayakan AI &middot; {{ $feasibilityMeta['label'] }}
                             </p>
-                            <p class="text-sm" style="color: {{ $feasibilityMeta['text'] }};">{{ $contentBrief->feasibility_notes }}</p>
+                            <p class="text-sm" style="color: var(--text-primary);">{{ $contentBrief->feasibility_notes }}</p>
                         </div>
                     </div>
                 @endif
