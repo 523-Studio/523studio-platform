@@ -49,7 +49,7 @@
                                             <input type="text" name="upload_deadline_at[{{ $item->id }}]"
                                                 value="{{ old('upload_deadline_at.' . $item->id, optional($item->upload_deadline_at)->format('Y-m-d H:i')) }}"
                                                 data-flatpickr="datetime" autocomplete="off"
-                                                class="w-full border border-[var(--border)] rounded-lg pl-8 pr-3 py-2 text-xs focus:outline-none focus:border-[#044b46]/40">
+                                                class="bg-[var(--surface-card)] w-full border border-[var(--border)] rounded-lg pl-8 pr-3 py-2 text-xs focus:outline-none focus:border-[#044b46]/40">
                                         </div>
                                     </td>
                                 </tr>
