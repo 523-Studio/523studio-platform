@@ -724,7 +724,7 @@ class AnalyticsSyncV2Pass1BTest extends TestCase
     public function test_auto_sync_schedule_uses_configured_timezone_and_time(): void
     {
         $events = app(\Illuminate\Console\Scheduling\Schedule::class)->events();
-        $event = collect($events)->first(fn ($e) => str_contains($e->command ?? '', 'analytics:auto-sync'));
+        $event = collect($events)->first(fn ($e) => str_contains(($e->command ?? $e->description ?? ''), 'analytics:auto-sync'));
 
         $this->assertNotNull($event, 'analytics:auto-sync HARUS terdaftar di scheduler.');
         $this->assertSame(config('app.timezone'), $event->timezone, 'Timezone HARUS eksplisit dari config(app.timezone), bukan implisit.');
@@ -732,7 +732,7 @@ class AnalyticsSyncV2Pass1BTest extends TestCase
 
         // Cuma SATU jadwal terdaftar buat auto-sync analytics (bukan 3
         // command lama yang sudah dikonsolidasi).
-        $autoSyncEvents = collect($events)->filter(fn ($e) => str_contains($e->command ?? '', 'analytics:sync-all-') || str_contains($e->command ?? '', 'analytics:auto-sync'));
+        $autoSyncEvents = collect($events)->filter(fn ($e) => str_contains(($e->command ?? $e->description ?? ''), 'analytics:sync-all-') || str_contains(($e->command ?? $e->description ?? ''), 'analytics:auto-sync'));
         $this->assertCount(1, $autoSyncEvents, 'HARUS cuma 1 jadwal otomatis analytics harian (3 command lama sudah tidak lagi di-schedule).');
     }
 

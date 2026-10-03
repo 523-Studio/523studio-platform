@@ -7,6 +7,18 @@ use App\Console\Commands\RecomputeDelayRiskScores;
 use App\Console\Commands\SendDelayRiskNotifications;
 use App\Jobs\RecalculateMonthlyKpi;
 
+// Shared hosting (Hostinger) mematikan proc_open, padahal Schedule::command()
+// menjalankan tiap perintah lewat proses terpisah (Symfony Process). Akibatnya
+// schedule:run jalan tiap menit tapi diam-diam tidak pernah mengeksekusi
+// queue:work maupun auto-sync. Helper ini menjalankan perintah artisan di
+// dalam proses schedule:run sendiri (tanpa proc_open), sehingga jadwal tetap
+// jalan di hosting itu. Nama event = string perintahnya.
+$inProcess = function (string $command) {
+    return Schedule::call(function () use ($command) {
+        Artisan::call(class_exists($command) ? app($command)->getName() : $command);
+    })->name($command);
+};
+
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
@@ -15,20 +27,20 @@ Artisan::command('inspire', function () {
 // (Supervisor) - queue didorong lewat cron schedule:run tiap menit sebagai
 // gantinya, --stop-when-empty supaya proses keluar begitu antrean kosong
 // alih-alih jalan terus dan bentrok dengan invocation menit berikutnya.
-Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')->everyMinute()->withoutOverlapping(2);
+$inProcess('queue:work --stop-when-empty --max-time=40 --tries=3')->everyMinute()->withoutOverlapping(2);
 
 // services/delay-risk-api/ di-host di PythonAnywhere free tier, yang
 // nonaktifkan web app-nya kalau tidak ada yang login & reactivate berkala.
 // Dua lapis jaring pengaman: reminder bulanan (proaktif) + health-check
 // harian (reaktif, sadar duluan kalau reminder kelewat).
-Schedule::command('delay-risk-api:remind-renewal')->monthlyOn(1, '09:00');
-Schedule::command('delay-risk-api:health-check')->daily();
+$inProcess('delay-risk-api:remind-renewal')->monthlyOn(1, '09:00');
+$inProcess('delay-risk-api:health-check')->daily();
 
-Schedule::command('analytics:detect-anomalies')->hourly();
+$inProcess('analytics:detect-anomalies')->hourly();
 
-Schedule::command(RecomputeDelayRiskScores::class)->dailyAt('10:00');
-Schedule::command(SendDelayRiskNotifications::class)->dailyAt('08:00');
-Schedule::command('workflow:update-overdue')->hourly();
+$inProcess(RecomputeDelayRiskScores::class)->dailyAt('10:00');
+$inProcess(SendDelayRiskNotifications::class)->dailyAt('08:00');
+$inProcess('workflow:update-overdue')->hourly();
 
 // KPI Team Performance - satu-satunya jadwal otomatis (pemicu kedua adalah
 // membuka halaman Team Performance saat hasil bulan berjalan belum ada/basi,
@@ -38,13 +50,13 @@ Schedule::job(new RecalculateMonthlyKpi(now()->startOfMonth()->toDateString()))-
 
 // Long-lived token Instagram (OAuth per client) cuma berlaku ~60 hari -
 // di-refresh otomatis tiap hari sebelum kadaluarsa (lihat RefreshInstagramTokens).
-Schedule::command('analytics:refresh-instagram-tokens')->daily();
+$inProcess('analytics:refresh-instagram-tokens')->daily();
 
 // TikTok - access_token JAUH lebih pendek umurnya dari Instagram (~24 jam,
 // bukan ~60 hari), jadi refresh dijadwalkan harian juga (lihat
 // RefreshTikTokTokens docblock - kontrak refresh token TikTok beda total
 // dari Instagram, refresh_token terpisah + dirotasi tiap dipakai).
-Schedule::command('analytics:refresh-tiktok-tokens')->daily();
+$inProcess('analytics:refresh-tiktok-tokens')->daily();
 
 // Analytics V2 Phase B - "AUTO SYNC, ONCE PER 24 HOURS" - SATU command
 // terkonsolidasi (lihat AutoSyncAnalytics docblock) menggantikan 3 baris
@@ -68,7 +80,7 @@ Schedule::command('analytics:refresh-tiktok-tokens')->daily();
 // murni membuat kebergantungan itu EKSPLISIT/self-documenting - kalau
 // config('app.timezone') pernah berubah di masa depan, satu sumber
 // kebenaran yang sama otomatis ikut, TIDAK ADA jam kedua yang bisa drift.
-Schedule::command('analytics:auto-sync')
+$inProcess('analytics:auto-sync')
     ->dailyAt(config('analytics.auto_sync_time'))
     ->timezone(config('app.timezone'));
 
@@ -94,7 +106,7 @@ Schedule::command('analytics:auto-sync')
 // config/analytics.php) - kalau kebutuhan historical-reporting jangka
 // panjang berubah nanti, naikkan content_metric_snapshot_retention_days,
 // JANGAN menonaktifkan baris ini lagi secara diam-diam.
-Schedule::command('analytics:prune-content-metric-snapshots')
+$inProcess('analytics:prune-content-metric-snapshots')
     ->dailyAt('03:00')
     ->timezone(config('app.timezone'));
 

@@ -216,7 +216,7 @@ class PruneContentMetricSnapshotsTest extends TestCase
     public function test_automatic_prune_schedule_is_registered_and_active(): void
     {
         $events = app(\Illuminate\Console\Scheduling\Schedule::class)->events();
-        $event = collect($events)->first(fn ($e) => str_contains($e->command ?? '', 'analytics:prune-content-metric-snapshots'));
+        $event = collect($events)->first(fn ($e) => str_contains(($e->command ?? $e->description ?? ''), 'analytics:prune-content-metric-snapshots'));
 
         $this->assertNotNull($event, 'analytics:prune-content-metric-snapshots HARUS terdaftar di scheduler (retensi 120 hari sekarang aktif).');
         $this->assertSame('0 3 * * *', $event->expression, 'Harus dailyAt(03:00) - digeser 15 menit sebelum analytics:auto-sync (03:15) biar tidak tumpang tindih.');
@@ -224,7 +224,7 @@ class PruneContentMetricSnapshotsTest extends TestCase
 
         // Cuma SATU jadwal terdaftar buat prune command ini - jangan sampai
         // ada duplikasi baris Schedule:: yang bikin dijalankan 2x/hari.
-        $pruneEvents = collect($events)->filter(fn ($e) => str_contains($e->command ?? '', 'analytics:prune-content-metric-snapshots'));
+        $pruneEvents = collect($events)->filter(fn ($e) => str_contains(($e->command ?? $e->description ?? ''), 'analytics:prune-content-metric-snapshots'));
         $this->assertCount(1, $pruneEvents, 'HARUS cuma 1 jadwal otomatis buat prune command ini.');
     }
 
