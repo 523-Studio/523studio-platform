@@ -8,11 +8,11 @@
            class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[var(--surface-card)] text-[var(--text-secondary)] transition-colors shrink-0 mt-0.5">
             <span class="material-symbols-outlined text-[19px]">arrow_back</span>
         </a>
-        <div>
+        <div class="min-w-0">
             <p class="text-xs text-[var(--text-muted)] mb-1">
                 <a href="{{ route('content-plan.show', $contentPlan) }}" class="hover:text-[var(--brand)]">{{ $contentPlan->client->name }}</a> / Atur Deadline
             </p>
-            <h1 class="font-display text-[26px] font-semibold text-[var(--text-primary)]">Atur Deadline Upload</h1>
+            <h1 class="font-display text-[22px] sm:text-[26px] font-semibold text-[var(--text-primary)]">Atur Deadline Upload</h1>
             <p class="text-sm text-[var(--text-secondary)] mt-1">Isi tanggal upload tiap item.</p>
         </div>
     </div>
@@ -31,9 +31,9 @@
                     <table class="w-full text-sm text-left">
                         <thead class="bg-[var(--surface-page)]">
                             <tr class="text-[var(--text-muted)] text-[11px] uppercase tracking-wide">
-                                <th class="px-5 py-3 font-medium">Item</th>
+                                <th class="px-5 py-3 font-medium min-w-[200px]">Item</th>
                                 <th class="px-4 py-3 font-medium">Tipe</th>
-                                <th class="px-5 py-3 font-medium w-[240px]">Tanggal Upload</th>
+                                <th class="px-5 py-3 font-medium w-[240px] min-w-[200px]">Tanggal Upload</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -58,7 +58,7 @@
                     </table>
                 </div>
             </div>
-            <div class="mt-5">
+            <div class="mt-5 flex justify-end">
                 <button type="submit" class="btn-primary">
                     <span class="material-symbols-outlined text-[16px]">save</span> Simpan Deadline
                 </button>
@@ -73,7 +73,7 @@
                 <p class="text-sm font-medium text-[var(--text-primary)]">Semua deadline sudah terisi.</p>
                 <p class="text-xs text-[var(--text-muted)] mt-0.5">Item akan pindah ke Brief Ready dan briefnya dikunci - tidak bisa diedit lagi setelah ini.</p>
             </div>
-            <form action="{{ route('content-plan.send-to-production', $contentPlan) }}" method="POST"
+            <form action="{{ route('content-plan.send-to-production', $contentPlan) }}" method="POST" class="self-end sm:self-auto"
                 onsubmit="return appConfirm(this, 'Kirim semua item ke produksi? Brief akan dikunci dan tidak bisa diedit lagi setelah ini.')">
                 @csrf
                 <button class="btn-primary whitespace-nowrap">

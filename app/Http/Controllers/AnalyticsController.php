@@ -42,6 +42,20 @@ class AnalyticsController extends Controller
         // dari MAX_CUSTOM_RANGE_DAYS) - resolver TETAP fallback tenang ke
         // bulan berjalan (Langkah 2 "never hard error for GET display
         // params"), pesan ini murni informational buat user.
+        // Kompatibilitas kontrak lama: link/redirect yang cuma membawa
+        // analysis_month=YYYY-MM (mis. redirect setelah Generate Analisis)
+        // diperlakukan sebagai filter periode mode Bulan di bulan itu,
+        // supaya filter utama & panel AI selalu menunjuk bulan yang sama.
+        // Kalau filter periode eksplisit sudah ada di query, itu yang menang.
+        $legacyAnalysisMonth = (string) $request->input('analysis_month', '');
+        if (! $request->filled('period_mode') && ! $request->filled('period')
+            && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $legacyAnalysisMonth)) {
+            $request->merge([
+                'period_mode' => AnalyticsPeriod::MODE_MONTH,
+                'month' => min($legacyAnalysisMonth, Carbon::now()->format('Y-m')),
+            ]);
+        }
+
         ['period' => $period, 'error' => $periodError] = $periodResolver->resolveWithError($request);
 
         // Analytics, Performance Table, dan Audience sekarang 1 halaman
@@ -172,7 +186,11 @@ class AnalyticsController extends Controller
         // Platforms, where('platform_id', X) buat platform spesifik,
         // BUKAN where('platform_id', $selectedPlatformId) polos (NULL
         // never equals NULL secara SQL).
-        $analysisMonth = $this->resolveAnalysisMonth($request);
+        $analysisMonth = $this->resolveAnalysisMonth($period);
+        // Mode Rentang: AI tetap per SATU bulan kalender (bulan akhir
+        // rentang), tapi tombol Generate dinonaktifkan di view dan
+        // pengguna diarahkan memilih mode Bulan - lihat index.blade.php.
+        $analysisFromRange = $period->mode !== AnalyticsPeriod::MODE_MONTH;
         $aiWindow = $aiStrategyService->resolveMonthWindow($analysisMonth);
         $latestAiInsight = AiStrategyInsight::where('client_id', $selectedClientId)
             ->when(
@@ -230,6 +248,7 @@ class AnalyticsController extends Controller
             'latestAiInsight',
             'aiAnalysisPeriodLabel',
             'analysisMonth',
+            'analysisFromRange',
             'coverageStatus',
             'coverageMessage',
             'cohortContextMessage',
@@ -569,6 +588,8 @@ class AnalyticsController extends Controller
 
         $result = $orchestrator->dispatch($client, $platformId, auth()->id());
 
+        \App\Support\QueueKicker::kick();
+
         return response()->json($result);
     }
 
@@ -608,8 +629,14 @@ class AnalyticsController extends Controller
         // bilang "jangan di-cache", membuat client bisa menerima payload
         // status BASI walau backend sudah genuinely maju - defense-in-depth
         // di atas fix single-source-of-truth di AnalyticsSyncOrchestrator.
+        $status = $orchestrator->statusForClient($client, $platformId);
+
+        if (in_array($status['overall_status'] ?? null, ['running', 'queued'], true)) {
+            \App\Support\QueueKicker::kick();
+        }
+
         return response()->json([
-            ...$orchestrator->statusForClient($client, $platformId),
+            ...$status,
             'progress' => $orchestrator->latestRunProgress($client, $platformId),
         ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
             ->header('Pragma', 'no-cache');
@@ -633,7 +660,10 @@ class AnalyticsController extends Controller
 
         $this->assertClientAccessible((int) $task->integration->client_id);
 
-        return response()->json($orchestrator->retryTask($task, auth()->id()));
+        $retry = $orchestrator->retryTask($task, auth()->id());
+        \App\Support\QueueKicker::kick();
+
+        return response()->json($retry);
     }
 
     /**
@@ -653,7 +683,10 @@ class AnalyticsController extends Controller
 
         $this->assertClientAccessible((int) $task->integration->client_id);
 
-        return response()->json($orchestrator->retryFailedItemsForTask($task, auth()->id()));
+        $retry = $orchestrator->retryFailedItemsForTask($task, auth()->id());
+        \App\Support\QueueKicker::kick();
+
+        return response()->json($retry);
     }
 
     /**
@@ -724,23 +757,19 @@ class AnalyticsController extends Controller
     }
 
     /**
-     * Bulan analisis AI Strategy (YYYY-MM) - READ/display context, pola
-     * tolerant-fallback SAMA seperti $period lain di controller ini
-     * (bukan hard-reject; field ini muncul di URL/GET, bukan mutating).
-     * Default bulan berjalan kalau kosong/invalid/di masa depan.
+     * Bulan analisis AI Strategy (YYYY-MM) - SELALU mengikuti filter
+     * periode utama: mode Bulan = bulan yang dipilih, mode Rentang/legacy
+     * = bulan dari tanggal akhir rentang (AI hanya menganalisis satu
+     * bulan kalender). Tidak pernah melebihi bulan berjalan.
      */
-    private function resolveAnalysisMonth(Request $request): string
+    private function resolveAnalysisMonth(AnalyticsPeriod $period): string
     {
-        $raw = (string) $request->input('analysis_month', '');
         $currentMonth = Carbon::now()->format('Y-m');
+        $month = $period->mode === AnalyticsPeriod::MODE_MONTH && $period->month
+            ? $period->month
+            : $period->dateTo->format('Y-m');
 
-        if (! preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $raw)) {
-            return $currentMonth;
-        }
-
-        // Bulan di masa depan tidak masuk akal buat retrospective
-        // performance analysis - treat sebagai bulan berjalan.
-        return $raw > $currentMonth ? $currentMonth : $raw;
+        return $month > $currentMonth ? $currentMonth : $month;
     }
 
     /**

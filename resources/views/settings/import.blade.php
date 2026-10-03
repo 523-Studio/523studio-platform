@@ -4,13 +4,13 @@
 
 <div x-data="importPage()" class="p-4 sm:p-6 lg:p-8 max-w-[1300px] mx-auto">
 
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 mb-2">
         <h1 class="font-display text-[26px] sm:text-[32px] font-semibold text-[var(--text-primary)]">Import Data Performa</h1>
         <a href="{{ route('settings', ['tab' => 'integrasi']) }}" class="text-sm font-medium text-[var(--brand)] hover:underline flex items-center gap-1">
             Lihat Log Sinkronisasi <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
         </a>
     </div>
-    <p class="text-[var(--text-secondary)] text-sm mb-6 max-w-2xl">Upload file CSV berisi metrik performa konten manual. Pastikan data sudah sesuai format sebelum meng-import.</p>
+    <p class="text-[var(--text-secondary)] text-sm mb-5 sm:mb-6 max-w-2xl">Upload file CSV berisi metrik performa konten manual. Pastikan data sudah sesuai format sebelum meng-import.</p>
 
     @if (session('import_success'))
         <div class="mb-5 bg-[var(--brand-tint)] border border-[var(--brand-tint-border)] rounded-lg p-4">
@@ -55,7 +55,7 @@
                 </div>
 
                 {{-- Dropzone --}}
-                <div class="card p-10 flex flex-col items-center justify-center text-center transition-colors"
+                <div class="card p-6 sm:p-10 flex flex-col items-center justify-center text-center transition-colors"
                      :class="dragging ? 'border-[var(--brand)] bg-[var(--brand-tint)]' : ''"
                      x-on:dragover.prevent="dragging = true"
                      x-on:dragleave.prevent="dragging = false"
@@ -74,15 +74,15 @@
 
                     <p class="text-xs text-[var(--text-muted)] mt-4">Supports .csv, maksimal 5MB</p>
 
-                    <p x-show="fileName" x-cloak class="text-sm font-medium text-[var(--brand)] mt-4 flex items-center gap-2">
+                    <p x-show="fileName" x-cloak class="text-sm font-medium text-[var(--brand)] mt-4 flex items-center gap-2 max-w-full">
                         <span class="material-symbols-outlined text-[17px]">description</span>
-                        <span x-text="fileName"></span>
+                        <span x-text="fileName" class="truncate"></span>
                     </p>
                 </div>
 
                 {{-- Preview --}}
                 <div class="card overflow-hidden" x-show="previewRows.length > 0" x-cloak>
-                    <div class="p-5 pb-3 flex items-center justify-between">
+                    <div class="p-4 sm:p-5 pb-3 flex flex-wrap items-center justify-between gap-2">
                         <h2 class="font-display text-lg font-semibold text-[var(--text-primary)]">Pratinjau Data</h2>
                         <span class="badge badge-neutral">Contoh (5 Baris Pertama)</span>
                     </div>
@@ -91,7 +91,7 @@
                             <thead>
                                 <tr class="bg-[var(--surface-page)] text-[var(--text-muted)] text-[11px] uppercase tracking-wide">
                                     <template x-for="col in previewHeader" :key="col">
-                                        <th class="px-5 py-2.5 font-medium" x-text="col"></th>
+                                        <th class="px-4 sm:px-5 py-2.5 font-medium whitespace-nowrap" x-text="col"></th>
                                     </template>
                                 </tr>
                             </thead>
@@ -99,7 +99,7 @@
                                 <template x-for="(row, i) in previewRows" :key="i">
                                     <tr class="border-t border-[var(--surface-muted)]">
                                         <template x-for="cell in row" :key="cell">
-                                            <td class="px-5 py-2.5 text-[var(--text-secondary)]" x-text="cell"></td>
+                                            <td class="px-4 sm:px-5 py-2.5 text-[var(--text-secondary)] whitespace-nowrap" x-text="cell"></td>
                                         </template>
                                     </tr>
                                 </template>
@@ -109,7 +109,7 @@
                 </div>
 
                 <button type="submit" :disabled="!fileName"
-                        class="btn-primary">
+                        class="btn-primary w-full sm:w-auto">
                     Konfirmasi Import
                 </button>
 
@@ -117,7 +117,7 @@
 
             {{-- Instructions --}}
             <div class="w-full lg:w-[300px] shrink-0 space-y-5">
-                <div class="card p-6">
+                <div class="card p-4 sm:p-6">
                     <div class="flex items-center gap-2 mb-4">
                         <span class="material-symbols-outlined text-[var(--brand)] text-[18px]">info</span>
                         <h2 class="font-display text-base font-semibold text-[var(--text-primary)]">Petunjuk</h2>

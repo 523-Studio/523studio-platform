@@ -631,6 +631,8 @@ class SettingsController extends Controller
      */
     private function syncSuccessResponse(Request $request, string $message, ?int $taskId = null)
     {
+        \App\Support\QueueKicker::kick();
+
         if ($request->wantsJson()) {
             return response()->json(['message' => $message, 'task_id' => $taskId]);
         }

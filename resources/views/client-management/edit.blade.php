@@ -4,19 +4,19 @@
 
 <div class="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
 
-    <div class="flex items-center gap-3 mb-7">
+    <div class="flex items-center gap-3 mb-5 sm:mb-7">
         <a href="{{ route('client-management.show', $client) }}"
            class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[var(--surface-card)] text-[var(--text-secondary)] transition-colors">
             <span class="material-symbols-outlined text-[19px]">arrow_back</span>
         </a>
-        <h1 class="font-display text-2xl font-semibold text-[var(--text-primary)]">Edit {{ $client->name }}</h1>
+        <h1 class="font-display text-xl sm:text-2xl font-semibold text-[var(--text-primary)] min-w-0 break-words">Edit {{ $client->name }}</h1>
     </div>
 
     <form action="{{ route('client-management.update', $client) }}" method="POST" enctype="multipart/form-data" class="space-y-5">
         @csrf
         @method('PUT')
 
-        <div class="card p-6">
+        <div class="card p-4 sm:p-6">
             <p class="text-sm font-semibold text-[var(--text-primary)] mb-5 flex items-center gap-2">
                 <span class="material-symbols-outlined text-[var(--brand)] text-[19px]">apartment</span>
                 Informasi Perusahaan

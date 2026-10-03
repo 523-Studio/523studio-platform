@@ -143,7 +143,7 @@
                     </div>
                     <div class="min-w-0">
                         <p class="font-medium text-[var(--text-primary)] truncate">{{ $user->name }}</p>
-                        <div class="flex items-center gap-2 mt-1">
+                        <div class="flex items-center gap-x-2 gap-y-1 mt-1 flex-wrap">
                             <span class="text-xs text-[var(--text-secondary)]">{{ $user->roleNamesLabel() }}</span>
                             <span class="badge badge-danger">Nonaktif</span>
                         </div>
@@ -155,7 +155,7 @@
             <div x-show="open" x-cloak x-transition class="mt-3 pt-3 border-t border-[var(--surface-muted)] space-y-2">
                 <div class="flex items-center justify-between text-xs">
                     <span class="text-[var(--text-muted)]">Email</span>
-                    <span class="text-[var(--text-primary)] font-medium truncate ml-3">{{ $user->email ?? '-' }}</span>
+                    <span class="text-[var(--text-primary)] font-medium truncate ml-3 min-w-0">{{ $user->email ?? '-' }}</span>
                 </div>
 
                 <div class="text-xs">

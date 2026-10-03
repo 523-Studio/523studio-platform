@@ -76,7 +76,7 @@
          disembunyikan di balik klik apapun. Query contract TIDAK berubah
          (AnalyticsPeriod::toQueryParams()/label(), AnalyticsPeriodResolver
          tetap sama persis) - ini murni perubahan presentasi/interaksi. --}}
-    <form method="GET" class="card p-4 mb-6 flex items-center gap-3 flex-wrap"
+    <form method="GET" class="card p-3 sm:p-4 mb-6 grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3 sm:flex-wrap"
           x-data="{
               mode: '{{ $isMonthMode ? 'month' : 'custom' }}',
               setMode(newMode) {
@@ -109,7 +109,7 @@
         <input type="hidden" id="analytics-period-date-to" name="date_to"
                value="{{ ! $isMonthMode ? $period->dateTo->toDateString() : '' }}" :disabled="mode !== 'custom'">
 
-        <select name="client_id" onchange="this.form.submit()" class="{{ $controlClass }}">
+        <select name="client_id" onchange="this.form.submit()" class="{{ $controlClass }} w-full min-w-0 sm:w-auto">
             <option value="">Pilih Klien...</option>
             @foreach ($clientOptions as $clientOption)
                 <option value="{{ $clientOption->id }}" {{ (string) $selectedClientId === (string) $clientOption->id ? 'selected' : '' }}>{{ $clientOption->name }}</option>
@@ -120,7 +120,7 @@
              bergeser pindah tab, walau cuma 1/0 opsi (disabled kalau
              begitu) - lihat catatan "jangan bergeser" di audit. --}}
         <select name="platform_id" onchange="this.form.submit()" {{ $platformOptions->count() <= 1 ? 'disabled' : '' }}
-                class="{{ $controlClass }} disabled:opacity-50 disabled:cursor-not-allowed">
+                class="{{ $controlClass }} w-full min-w-0 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed">
             <option value="">Semua Platform</option>
             @foreach ($platformOptions as $p)
                 <option value="{{ $p->id }}" {{ (string) ($selectedPlatformId ?? '') === (string) $p->id ? 'selected' : '' }}>{{ $p->name }}</option>
@@ -130,15 +130,16 @@
         {{-- Langkah 1/7 - toggle Bulan/Rentang VISIBLE langsung di filter
              bar, bukan lagi di dalam popover - user langsung tahu mode
              mana yang aktif tanpa membuka apapun. --}}
-        <div class="flex items-center gap-1 bg-[var(--surface-muted)] rounded-lg p-1 h-10 shrink-0"
+        <div class="col-span-2 flex items-center gap-2 sm:contents">
+        <div class="flex items-center gap-0.5 sm:gap-1 bg-[var(--surface-muted)] rounded-lg p-1 h-10 shrink-0"
              role="group" aria-label="Mode periode" data-testid="period-mode-toggle">
             <button type="button" @click="setMode('month')" :aria-pressed="mode === 'month'"
-                    class="text-sm font-medium px-3.5 h-full rounded-md transition-colors"
+                    class="text-xs sm:text-sm font-medium px-2.5 sm:px-3.5 h-full rounded-md transition-colors"
                     :class="mode === 'month' ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'">
                 Bulan
             </button>
             <button type="button" @click="setMode('custom')" :aria-pressed="mode === 'custom'"
-                    class="text-sm font-medium px-3.5 h-full rounded-md transition-colors"
+                    class="text-xs sm:text-sm font-medium px-2.5 sm:px-3.5 h-full rounded-md transition-colors"
                     :class="mode === 'custom' ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'">
                 Rentang
             </button>
@@ -150,10 +151,17 @@
              visual dengan kontrol Rentang di sebelahnya (Langkah 7) - baik
              typography maupun tinggi/border ikut $controlClass yang sama,
              bukan chrome native browser yang beda-beda tiap browser. --}}
-        <input type="text" name="month" x-show="mode === 'month'" x-cloak readonly
-               :disabled="mode !== 'month'" value="{{ $isMonthMode ? $period->month : now()->format('Y-m') }}"
-               data-flatpickr="month-combined" data-autosubmit="true"
-               class="{{ $controlClass }} cursor-pointer w-full sm:w-auto" aria-label="Pilih bulan" data-testid="period-month-input">
+        {{-- x-show dipasang di WRAPPER (bukan di input): di HP, flatpickr
+             mode single membuat input native saudara (type=date) di samping
+             input aslinya, dan x-show pada input asli TIDAK ikut
+             menyembunyikannya, sehingga field bulan tetap nongol di mode
+             Rentang (tampak "bertingkat"). Wrapper menyembunyikan keduanya. --}}
+        <div x-show="mode === 'month'" x-cloak class="flex-1 min-w-0 sm:flex-none">
+            <input type="text" name="month" x-show="mode === 'month'" x-cloak readonly
+                   :disabled="mode !== 'month'" value="{{ $isMonthMode ? $period->month : now()->format('Y-m') }}"
+                   data-flatpickr="month-combined" data-autosubmit="true"
+                   class="{{ $controlClass }} cursor-pointer w-full min-w-0 sm:w-auto" aria-label="Pilih bulan" data-testid="period-month-input">
+        </div>
 
         {{-- Rentang - SATU kontrol visual (Langkah 3, BUKAN 2 field Dari/
              Sampai terpisah) - flatpickr mode 'range', auto-submit HANYA
@@ -161,13 +169,14 @@
              pertama dipilih SENGAJA belum submit. Ditangani generik lewat
              window.initFlatpickrs (lihat layouts/app.blade.php, case
              data-flatpickr bernilai "range"). --}}
-        <div x-show="mode === 'custom'" x-cloak class="relative" data-testid="period-range-control">
-            <span class="material-symbols-outlined text-[17px] text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">calendar_month</span>
+        <div x-show="mode === 'custom'" x-cloak class="relative flex-1 min-w-0 sm:flex-none" data-testid="period-range-control">
+            <span class="material-symbols-outlined text-[17px] text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:block">calendar_month</span>
             <input type="text" readonly
                    data-flatpickr="range" data-autosubmit="true"
                    data-from-input="#analytics-period-date-from" data-to-input="#analytics-period-date-to"
                    data-max-date="{{ now()->toDateString() }}" data-placeholder="Pilih rentang tanggal"
-                   class="{{ $controlClass }} pl-9 w-full sm:w-[230px] cursor-pointer" aria-label="Pilih rentang tanggal">
+                   class="{{ $controlClass }} !pl-2.5 sm:!pl-9 !pr-2 sm:!pr-3.5 !text-xs sm:!text-sm w-full min-w-0 sm:w-[230px] cursor-pointer truncate" aria-label="Pilih rentang tanggal">
+        </div>
         </div>
     </form>
 
@@ -340,8 +349,8 @@
                 <div class="rounded-2xl overflow-hidden border border-[var(--border)] bg-[var(--surface-card)]" x-data="{ loading: false }">
 
                     {{-- Header flat (bukan gradient) - konsisten sama treatment card lain --}}
-                    <div class="bg-[var(--surface-page)] border-b border-[var(--border)] px-4 sm:px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div class="flex items-center gap-3">
+                    <div class="bg-[var(--surface-page)] border-b border-[var(--border)] px-4 sm:px-6 py-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3 min-w-0">
                             <div class="w-9 h-9 rounded-xl bg-[var(--brand-tint)] flex items-center justify-center shrink-0">
                                 <span class="material-symbols-outlined text-[var(--brand)] text-[19px]">auto_awesome</span>
                             </div>
@@ -351,59 +360,92 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-3 shrink-0 flex-wrap">
-                            {{-- Phase 4.1 (v2) - Bulan Analisis KHUSUS AI Strategy,
-                                 TERPISAH dari filter period 7/30/90 Overview/Table/
-                                 Audience - ganti bulan langsung reload buat lihat
-                                 histori bulan itu (kalau ada), tanpa perlu generate
-                                 ulang. max=bulan berjalan - retrospective analysis,
-                                 bukan proyeksi ke masa depan. --}}
-                            <form method="GET" class="shrink-0">
-                                <input type="hidden" name="client_id" value="{{ $selectedClientId }}">
-                                <input type="hidden" name="tab" value="overview">
-                                @foreach ($period->toQueryParams() as $key => $value)
-                                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                                @endforeach
-                                @if ($selectedPlatformId)
-                                    <input type="hidden" name="platform_id" value="{{ $selectedPlatformId }}">
-                                @endif
-                                <label for="ai-analysis-month" class="sr-only">Bulan Analisis</label>
-                                <div class="relative">
-                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-[17px] pointer-events-none">calendar_month</span>
-                                    <input type="text" id="ai-analysis-month" name="analysis_month" value="{{ $analysisMonth }}"
-                                           data-flatpickr="month-combined" data-autosubmit="true" data-max="{{ now()->format('Y-m') }}" readonly
-                                           class="text-sm border border-[var(--border)] rounded-lg pl-9 pr-3 bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40 h-[40px] w-[150px]">
+                        @php
+                            // Bulan analisis AI SELALU = bulan di filter periode utama
+                            // (mode Bulan), atau bulan akhir rentang (mode Rentang -
+                            // AI cuma menganalisis SATU bulan kalender, jadi Generate
+                            // dinonaktifkan sampai pengguna pindah ke mode Bulan).
+                            // Nilai $analysisMonth yang sama dikirim ke endpoint
+                            // generate (hidden analysis_month) dan dicek server.
+                            $aiMonthCarbon = \Illuminate\Support\Carbon::createFromFormat('Y-m-d', $analysisMonth.'-01');
+                            $aiMonthText = $aiMonthCarbon->translatedFormat('F Y');
+                            $aiMonthIsCurrent = $analysisMonth === now()->format('Y-m');
+                            $aiPlatformName = $selectedPlatformId
+                                ? ($platformOptions->firstWhere('id', $selectedPlatformId)?->name ?? 'Platform')
+                                : 'Semua Platform';
+                            $aiSwitchToMonthUrl = route('analytics', array_filter([
+                                'tab' => 'overview',
+                                'client_id' => $selectedClientId,
+                                'platform_id' => $selectedPlatformId,
+                                'period_mode' => 'month',
+                                'month' => $analysisMonth,
+                            ]));
+                        @endphp
+                        <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 min-w-0 lg:justify-end">
+                            {{-- BADGE bulan analisis - ikut berubah saat filter periode
+                                 utama berubah (server-rendered dari filter itu sendiri). --}}
+                            <div class="min-w-0 flex items-center gap-2.5 rounded-xl border px-3 py-2 {{ $analysisFromRange ? 'bg-[var(--warning-tint)] border-[var(--warning-border)]' : 'bg-[var(--brand-tint)] border-[var(--brand-border)]' }}"
+                                 data-testid="ai-analysis-badge" role="status" aria-live="polite">
+                                <span class="material-symbols-outlined text-[20px] shrink-0 {{ $analysisFromRange ? 'text-[var(--warning-text)]' : 'text-[var(--brand)]' }}">{{ $analysisFromRange ? 'event_busy' : 'event_available' }}</span>
+                                <div class="min-w-0 leading-tight">
+                                    <p class="text-[10px] font-semibold uppercase tracking-wide {{ $analysisFromRange ? 'text-[var(--warning-text)]' : 'text-[var(--text-muted)]' }}">Bulan analisis</p>
+                                    <p class="text-sm font-semibold text-[var(--text-primary)] break-words">
+                                        {{ $aiMonthText }}<span class="font-medium text-[var(--text-secondary)]"> &middot; {{ $aiPlatformName }}</span>
+                                    </p>
+                                    @if ($aiMonthIsCurrent)
+                                        <p class="text-[11px] text-[var(--text-muted)]">Bulan berjalan, data sampai hari ini</p>
+                                    @endif
                                 </div>
-                            </form>
-                            @if ($latestAiInsight)
-                                <a href="{{ route('analytics.ai-strategy.history', ['client_id' => $selectedClientId]) }}"
-                                   class="text-xs font-medium text-[var(--text-muted)] hover:text-[var(--brand)] flex items-center gap-1 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)] rounded">
-                                    <span class="material-symbols-outlined text-[15px]">history</span> Riwayat
-                                </a>
-                            @endif
-                        @if ($canManageAiStrategy)
-                        <form action="{{ route('analytics.ai-strategy') }}" method="POST" x-on:submit="loading = true" class="shrink-0">
-                            @csrf
-                            <input type="hidden" name="client_id" value="{{ $selectedClientId }}">
-                            {{-- Bulan Analisis + platform yang lagi dipilih di atas -
-                                 lihat AnalyticsController::generateAiStrategy(). --}}
-                            <input type="hidden" name="analysis_month" value="{{ $analysisMonth }}">
-                            <input type="hidden" name="platform_id" value="{{ $selectedPlatformId }}">
-                            <button type="submit" :disabled="loading"
-                                    class="btn-primary">
-                                <span x-show="!loading" class="flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[16px]">{{ $latestAiInsight ? 'refresh' : 'bolt' }}</span>
-                                    {{ $latestAiInsight ? 'Generate Ulang' : 'Generate Analisis' }}
-                                </span>
-                                <span x-show="loading" x-cloak class="flex items-center gap-1.5">
-                                    <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
-                                    Menganalisis...
-                                </span>
-                            </button>
-                        </form>
-                        @endif
+                            </div>
+
+                            <div class="flex items-center gap-3 sm:shrink-0">
+                                @if ($latestAiInsight)
+                                    <a href="{{ route('analytics.ai-strategy.history', ['client_id' => $selectedClientId]) }}"
+                                       class="text-xs font-medium text-[var(--text-muted)] hover:text-[var(--brand)] flex items-center gap-1 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)] rounded">
+                                        <span class="material-symbols-outlined text-[15px]">history</span> Riwayat
+                                    </a>
+                                @endif
+                                @if ($canManageAiStrategy)
+                                    @if ($analysisFromRange)
+                                        <button type="button" disabled class="btn-primary flex-1 sm:flex-none" title="Pilih mode Bulan di filter periode untuk generate analisis">
+                                            <span class="material-symbols-outlined text-[16px]">bolt</span>
+                                            {{ $latestAiInsight ? 'Generate Ulang' : 'Generate Analisis' }}
+                                        </button>
+                                    @else
+                                        <form action="{{ route('analytics.ai-strategy') }}" method="POST" x-on:submit="loading = true" class="flex-1 sm:flex-none flex">
+                                            @csrf
+                                            <input type="hidden" name="client_id" value="{{ $selectedClientId }}">
+                                            {{-- Bulan Analisis (= filter periode utama) + platform filter utama -
+                                                 lihat AnalyticsController::generateAiStrategy(). --}}
+                                            <input type="hidden" name="analysis_month" value="{{ $analysisMonth }}">
+                                            <input type="hidden" name="platform_id" value="{{ $selectedPlatformId }}">
+                                            <button type="submit" :disabled="loading"
+                                                    class="btn-primary flex-1">
+                                                <span x-show="!loading" class="flex items-center gap-1.5">
+                                                    <span class="material-symbols-outlined text-[16px]">{{ $latestAiInsight ? 'refresh' : 'bolt' }}</span>
+                                                    {{ $latestAiInsight ? 'Generate Ulang' : 'Generate Analisis' }}
+                                                </span>
+                                                <span x-show="loading" x-cloak class="flex items-center gap-1.5">
+                                                    <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+                                                    Menganalisis...
+                                                </span>
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endif
+                            </div>
                         </div>
                     </div>
+
+                    @if ($analysisFromRange)
+                        <div class="px-4 sm:px-6 py-3 bg-[var(--warning-tint)] border-b border-[var(--warning-border)] text-xs text-[var(--warning-text)] flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3" data-testid="ai-range-notice">
+                            <p class="flex items-start gap-2 min-w-0">
+                                <span class="material-symbols-outlined text-[16px] shrink-0 mt-px">info</span>
+                                <span>Mode Rentang aktif, tapi analisis AI selalu per satu bulan kalender. Panel ini menampilkan bulan akhir rentang ({{ $aiMonthText }}). Untuk generate, pilih mode Bulan di filter periode atas.</span>
+                            </p>
+                            <a href="{{ $aiSwitchToMonthUrl }}" class="font-semibold underline underline-offset-2 whitespace-nowrap sm:ml-auto">Pakai mode Bulan ({{ $aiMonthText }})</a>
+                        </div>
+                    @endif
 
                     <div class="bg-[var(--surface-card)] p-4 sm:p-6">
 
@@ -419,8 +461,10 @@
                             </div>
                             <p class="text-sm font-medium text-[var(--text-primary)] mb-1">Belum ada analisis buat client ini</p>
                             <p class="text-xs text-[var(--text-muted)] max-w-xs">
-                                @if ($canManageAiStrategy)
-                                    Klik "Generate Analisis" di atas — AI bakal baca performa {{ $aiAnalysisPeriodLabel }} dan kasih rekomendasi strategi konkret.
+                                @if ($canManageAiStrategy && $analysisFromRange)
+                                    Pilih mode Bulan di filter periode atas, lalu klik "Generate Analisis" untuk menganalisis {{ $aiAnalysisPeriodLabel }}.
+                                @elseif ($canManageAiStrategy)
+                                    Klik "Generate Analisis" di atas, AI bakal baca performa {{ $aiAnalysisPeriodLabel }} dan kasih rekomendasi strategi konkret.
                                 @else
                                     Belum ada yang men-generate analisis AI untuk client ini.
                                 @endif

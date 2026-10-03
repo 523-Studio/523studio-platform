@@ -5,19 +5,19 @@
 
     {{-- Header — susunan sama seperti /content-plan: judul & konteks di kiri,
          aksi utama di kanan (bukan tumpuk banyak tombol sekaligus). --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-7">
-        <div class="flex items-start gap-3">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-5 sm:mb-7">
+        <div class="flex items-start gap-3 min-w-0">
             <a href="{{ route('content-plan.index') }}" title="Kembali ke daftar Content Plan"
                class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[var(--surface-card)] text-[var(--text-secondary)] transition-colors shrink-0 mt-0.5">
                 <span class="material-symbols-outlined text-[19px]">arrow_back</span>
             </a>
-            <div>
+            <div class="min-w-0">
                 <p class="text-xs text-[var(--text-muted)] mb-1">
                     <a href="{{ route('content-plan.index') }}" class="hover:text-[var(--brand)]">Rencana Konten</a> /
                     {{ \Carbon\Carbon::create()->month($contentPlan->month)->translatedFormat('F') }} {{ $contentPlan->year }}
                 </p>
                 <div class="flex items-center gap-3 flex-wrap">
-                    <h1 class="font-display text-[26px] sm:text-[32px] font-semibold text-[var(--text-primary)]">{{ $contentPlan->client->name }}</h1>
+                    <h1 class="font-display text-[22px] sm:text-[32px] font-semibold text-[var(--text-primary)] leading-tight">{{ $contentPlan->client->name }}</h1>
                     <span class="badge
                         {{ $contentPlan->status === 'approved' ? 'badge-success' : '' }}
                         {{ $contentPlan->status === 'draft' ? 'badge-neutral' : '' }}
@@ -44,12 +44,12 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-2 flex-wrap shrink-0" x-data="{ rejectOpen: {{ $errors->has('rejection_note') ? 'true' : 'false' }} }">
+        <div class="flex items-center justify-end gap-2 flex-wrap ml-auto shrink-0" x-data="{ rejectOpen: {{ $errors->has('rejection_note') ? 'true' : 'false' }} }">
             @if ($contentPlan->status === 'pending' && auth()->user()->hasPermissionTo('content_plan', 'approve'))
-                <button type="button" @click="rejectOpen = true" class="btn-danger">Tolak</button>
+                <button type="button" @click="rejectOpen = true" class="btn-danger !px-3 !py-2 text-[13px] sm:!px-5 sm:!py-2.5 sm:text-sm">Tolak</button>
                 <form action="{{ route('content-plan.approve', $contentPlan) }}" method="POST">
                     @csrf @method('PATCH')
-                    <button class="btn-primary">
+                    <button class="btn-primary !px-3 !py-2 text-[13px] sm:!px-5 sm:!py-2.5 sm:text-sm whitespace-nowrap">
                         <span class="material-symbols-outlined text-[16px]">check</span> Setujui Rencana
                     </button>
                 </form>
@@ -82,16 +82,20 @@
             @endif
 
             @if ($contentPlan->status === 'approved' && auth()->user()->hasPermissionTo('content_plan', 'approve') && $items->contains(fn ($i) => $i->workflow?->current_status === 'draft'))
-                <a href="{{ route('content-plan.deadlines', $contentPlan) }}" class="btn-primary whitespace-nowrap">
-                    <span class="material-symbols-outlined text-[16px]">event</span> Atur Deadline &amp; Kirim ke Produksi
+                <a href="{{ route('content-plan.deadlines', $contentPlan) }}" class="btn-primary !px-3 !py-2 text-[13px] sm:!px-5 sm:!py-2.5 sm:text-sm whitespace-nowrap">
+                    <span class="material-symbols-outlined text-[16px]">event</span>
+                    <span class="sm:hidden">Atur Deadline</span>
+                    <span class="hidden sm:inline">Atur Deadline &amp; Kirim ke Produksi</span>
                 </a>
             @endif
 
             @if ($contentPlan->status === 'rejected' && auth()->user()->hasPermissionTo('content_plan', 'create'))
                 <form action="{{ route('content-plan.reopen', $contentPlan) }}" method="POST">
                     @csrf @method('PATCH')
-                    <button class="btn-primary whitespace-nowrap">
-                        <span class="material-symbols-outlined text-[16px]">undo</span> Kembalikan ke Draf & Perbaiki
+                    <button class="btn-primary !px-3 !py-2 text-[13px] sm:!px-5 sm:!py-2.5 sm:text-sm whitespace-nowrap">
+                        <span class="material-symbols-outlined text-[16px]">undo</span>
+                        <span class="sm:hidden">Kembalikan ke Draf</span>
+                        <span class="hidden sm:inline">Kembalikan ke Draf & Perbaiki</span>
                     </button>
                 </form>
             @endif
@@ -280,7 +284,7 @@
                         <p class="text-xs text-[var(--text-muted)] mt-0.5">Setelah diajukan, rencana ini akan menunggu persetujuan Manager/CEO/SMO.</p>
                     @endif
                 </div>
-                <form action="{{ route('content-plan.submit', $contentPlan) }}" method="POST">
+                <form action="{{ route('content-plan.submit', $contentPlan) }}" method="POST" class="self-end sm:self-auto">
                     @csrf @method('PATCH')
                     <button class="btn-primary whitespace-nowrap" @disabled($incompleteItems->isNotEmpty())
                         title="{{ $incompleteItems->isNotEmpty() ? 'Lengkapi dulu semua brief sebelum mengajukan' : '' }}">

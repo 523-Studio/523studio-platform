@@ -81,8 +81,8 @@
                 </button>
 
                 <div x-show="open" @click.outside="open = false" x-transition x-cloak
-                     class="absolute right-0 mt-2 w-[min(24rem,calc(100vw-2rem))] card z-50 overflow-hidden">
-                    <div class="px-5 pt-5 pb-4">
+                     class="fixed inset-x-3 top-[4.25rem] sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96 card z-50 overflow-hidden shadow-xl">
+                    <div class="px-4 sm:px-5 pt-4 sm:pt-5 pb-3 sm:pb-4">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="font-display text-lg font-semibold text-[var(--text-primary)] leading-none">Notifikasi</h3>
                             <div class="flex items-center gap-3">
@@ -93,7 +93,7 @@
                                         <button type="submit" class="text-xs font-medium text-[var(--brand)] hover:underline leading-none">Tandai semua dibaca</button>
                                     </form>
                                 @endif
-                                <button @click="open = false" type="button" class="flex items-center text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
+                                <button @click="open = false" type="button" aria-label="Tutup" class="flex items-center justify-center w-8 h-8 -mr-1 rounded-full text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-page)]">
                                     <span class="material-symbols-outlined text-[18px]">close</span>
                                 </button>
                             </div>
@@ -113,13 +113,13 @@
                         </div>
                     </div>
 
-                    <div class="max-h-96 overflow-y-auto px-3 pb-3 space-y-1">
+                    <div class="max-h-[60vh] sm:max-h-96 overflow-y-auto overscroll-contain px-3 pb-3 space-y-1">
                         @forelse ($notifications as $notif)
                             @php $meta = $typeMeta[$notif->type] ?? $typeMeta['system']; @endphp
                             <form method="POST" action="{{ route('notifications.read', $notif->id) }}" x-show="tab === 'all' || tab === '{{ $notif->type }}'">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="w-full flex gap-3 rounded-lg p-3 hover:bg-[var(--surface-page)] relative text-left">
+                                <button type="submit" class="w-full flex gap-3 rounded-lg p-3 hover:bg-[var(--surface-page)] active:bg-[var(--surface-page)] relative text-left">
                                     <div class="relative shrink-0">
                                         <div class="w-8 h-8 rounded-full {{ $meta['bg'] }} flex items-center justify-center">
                                             <span class="material-symbols-outlined {{ $meta['color'] }} text-[16px]">{{ $meta['icon'] }}</span>
@@ -134,7 +134,7 @@
                                             <span class="text-[10px] text-[var(--text-muted)] shrink-0 whitespace-nowrap">{{ $notif->created_at->diffForHumans() }}</span>
                                         </div>
                                         @if ($notif->body)
-                                            <p class="text-xs text-[var(--text-secondary)] mt-0.5 line-clamp-2">{{ $notif->body }}</p>
+                                            <p class="text-xs text-[var(--text-secondary)] mt-0.5 line-clamp-3 break-words">{{ $notif->body }}</p>
                                         @endif
                                     </div>
                                 </button>

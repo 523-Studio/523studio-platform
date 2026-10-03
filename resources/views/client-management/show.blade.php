@@ -17,8 +17,8 @@
         },
     }" class="p-4 sm:p-6 lg:p-8 max-w-[1300px] mx-auto">
 
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-7">
-        <div class="flex items-center gap-4">
+    <div class="flex items-center justify-between gap-3 mb-5 sm:mb-7">
+        <div class="flex items-center gap-3 sm:gap-4 min-w-0">
             <a href="{{ route('client-management.index') }}"
                class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[var(--surface-card)] text-[var(--text-secondary)] transition-colors shrink-0">
                 <span class="material-symbols-outlined text-[19px]">arrow_back</span>
@@ -30,9 +30,9 @@
                     {{ strtoupper(substr($client->name, 0, 1)) }}
                 @endif
             </div>
-            <div>
-                <div class="flex items-center gap-2.5">
-                    <h1 class="font-display text-2xl font-semibold text-[var(--text-primary)]">{{ $client->name }}</h1>
+            <div class="min-w-0">
+                <div class="flex items-center gap-x-2.5 gap-y-1 flex-wrap">
+                    <h1 class="font-display text-xl sm:text-2xl font-semibold text-[var(--text-primary)] break-words">{{ $client->name }}</h1>
                     <span class="badge
                         {{ $client->status === 'active' ? 'badge-success' : '' }}
                         {{ $client->status === 'past_due' ? 'badge-danger' : '' }}
@@ -46,13 +46,13 @@
 
         @if ($canManageClient)
             <a href="{{ route('client-management.edit', $client) }}"
-               class="btn-primary shrink-0">
-                <span class="material-symbols-outlined text-[17px]">edit</span> Edit Klien
+               class="btn-primary ml-auto shrink-0 !px-3 !py-2 sm:!px-5 sm:!py-2.5">
+                <span class="material-symbols-outlined text-[17px]">edit</span> <span class="sm:hidden">Edit</span><span class="hidden sm:inline">Edit Klien</span>
             </a>
         @else
             <span title="Cuma CEO/Manager yang bisa mengubah data klien"
-                  class="btn-primary shrink-0 opacity-40 cursor-not-allowed pointer-events-none">
-                <span class="material-symbols-outlined text-[17px]">edit</span> Edit Klien
+                  class="btn-primary ml-auto shrink-0 !px-3 !py-2 sm:!px-5 sm:!py-2.5 opacity-40 cursor-not-allowed pointer-events-none">
+                <span class="material-symbols-outlined text-[17px]">edit</span> <span class="sm:hidden">Edit</span><span class="hidden sm:inline">Edit Klien</span>
             </span>
         @endif
     </div>
@@ -77,18 +77,18 @@
 
         <div class="flex-1 min-w-0 space-y-5">
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div class="card p-6">
+            <div class="grid grid-cols-2 gap-3 sm:gap-5">
+                <div class="card p-4 sm:p-6">
                     <p class="text-sm text-[var(--text-secondary)] mb-2">Total Rencana Konten</p>
                     <p class="font-display text-2xl font-semibold text-[var(--text-primary)]">{{ $planCount }}</p>
                 </div>
-                <div class="card p-6">
+                <div class="card p-4 sm:p-6">
                     <p class="text-sm text-[var(--text-secondary)] mb-2">Total Konten Dibuat</p>
                     <p class="font-display text-2xl font-semibold text-[var(--text-primary)]">{{ $contentCount }}</p>
                 </div>
             </div>
 
-            <div class="card p-6">
+            <div class="card p-4 sm:p-6">
                 <h2 class="font-display text-lg font-semibold text-[var(--text-primary)] mb-4">Konten Terbaru</h2>
 
                 @if ($recentContentItems->isEmpty())
@@ -153,7 +153,7 @@
 
         <div class="w-full lg:w-[320px] shrink-0 space-y-5">
 
-            <div class="card p-6">
+            <div class="card p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="font-display text-base font-semibold text-[var(--text-primary)]">Akses Portal Klien</h2>
                     <span class="badge {{ $client->portal_access_enabled ? 'badge-success' : 'badge-neutral' }}">
@@ -246,7 +246,7 @@
                 </div>
             </template>
 
-            <div class="card p-6">
+            <div class="card p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="font-display text-base font-semibold text-[var(--text-primary)]">Paket Aktif</h2>
                     <button type="button" @click="showPackageModal = true" {{ $canManageClient ? '' : 'disabled' }}
@@ -267,7 +267,7 @@
                 @endif
             </div>
 
-            <div class="card p-6">
+            <div class="card p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="font-display text-base font-semibold text-[var(--text-primary)]">Integrasi Performa</h2>
                     <a href="{{ route('settings', ['tab' => 'integrasi']) }}" class="text-xs text-[var(--brand)] hover:underline">Riwayat sync</a>
@@ -331,7 +331,7 @@
                         <summary class="cursor-pointer text-[var(--brand)] font-medium select-none">Sinkronisasi Konten Historis</summary>
                         <div class="mt-2 space-y-1.5">
                             <p class="text-[11px] text-[var(--text-muted)]">Gunakan ini untuk mengambil data bulan lama yang belum tersync.</p>
-                            <form id="ig-historical-form" action="{{ route('settings.sync-instagram') }}" method="POST" class="flex items-center gap-2">
+                            <form id="ig-historical-form" action="{{ route('settings.sync-instagram') }}" method="POST" class="flex items-center gap-2 flex-wrap">
                                 @csrf
                                 <input type="hidden" name="client_id" value="{{ $client->id }}">
                                 <input type="month" name="month" required max="{{ now()->format('Y-m') }}"
@@ -413,7 +413,7 @@
                         <summary class="cursor-pointer text-[var(--brand)] font-medium select-none">Sinkronisasi Konten Historis</summary>
                         <div class="mt-2 space-y-1.5">
                             <p class="text-[11px] text-[var(--text-muted)]">Gunakan ini untuk mengambil data bulan lama yang belum tersync.</p>
-                            <form id="tt-historical-form" action="{{ route('settings.sync-tiktok') }}" method="POST" class="flex items-center gap-2">
+                            <form id="tt-historical-form" action="{{ route('settings.sync-tiktok') }}" method="POST" class="flex items-center gap-2 flex-wrap">
                                 @csrf
                                 <input type="hidden" name="client_id" value="{{ $client->id }}">
                                 <input type="month" name="month" required max="{{ now()->format('Y-m') }}"
@@ -445,7 +445,7 @@
                 @endif
             </div>
 
-            <div class="card p-6">
+            <div class="card p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="font-display text-base font-semibold text-[var(--text-primary)]">Tim yang Menangani</h2>
                     <button type="button" @click="showPicModal = true" {{ $canManageClient ? '' : 'disabled' }}
@@ -500,7 +500,7 @@
                 @endif
             </div>
 
-            <div class="card p-6">
+            <div class="card p-4 sm:p-6">
                 <h2 class="font-display text-base font-semibold text-[var(--text-primary)] mb-4">Aset Klien</h2>
 
                 @if ($client->asset_link)
@@ -517,7 +517,7 @@
                 @endif
             </div>
 
-            <div class="card p-6">
+            <div class="card p-4 sm:p-6">
                 <h2 class="text-sm font-semibold text-[var(--danger-text)] mb-3">Zona Berbahaya</h2>
                 <form action="{{ route('client-management.destroy', $client) }}" method="POST"
                       onsubmit="return appConfirm(this, 'Yakin hapus {{ addslashes($client->name) }}? Kalau sudah punya riwayat konten, klien hanya akan dinonaktifkan, bukan dihapus permanen.', { danger: true })">

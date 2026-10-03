@@ -4,17 +4,17 @@
 
 <div class="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto">
 
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-7">
-        <div>
+    <div class="flex items-center justify-between gap-3 mb-5 sm:mb-7">
+        <div class="min-w-0">
             <h1 class="font-display text-[26px] sm:text-[32px] font-semibold text-[var(--text-primary)]">Kelola Klien</h1>
             <p class="text-[var(--text-secondary)] text-sm mt-1">Kelola portofolio klien dan paket langganan mereka.</p>
         </div>
 
         @if (auth()->user()->hasPermissionTo('client', 'manage'))
             <a href="{{ route('client-management.create') }}"
-               class="self-start btn-primary">
+               class="btn-primary ml-auto shrink-0 !px-3 !py-2 sm:!px-5 sm:!py-2.5">
                 <span class="material-symbols-outlined text-[17px]">person_add</span>
-                Tambah Klien
+                <span class="sm:hidden">Tambah</span><span class="hidden sm:inline">Tambah Klien</span>
             </a>
         @endif
     </div>
@@ -24,15 +24,15 @@
     @endif
 
     {{-- Search & Filter --}}
-    <form method="GET" action="{{ route('client-management.index') }}" class="card p-4 mb-5 flex flex-col sm:flex-row sm:items-center gap-3">
-        <div class="flex-1 relative">
+    <form method="GET" action="{{ route('client-management.index') }}" class="card p-3 sm:p-4 mb-4 sm:mb-5 grid grid-cols-2 sm:flex sm:flex-row sm:items-center gap-2.5 sm:gap-3">
+        <div class="col-span-2 sm:flex-1 relative">
             <span class="material-symbols-outlined absolute inset-y-0 left-0 flex items-center pl-3.5 text-[var(--text-muted)] text-[19px]">search</span>
             <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama klien atau brand..."
                    class="bg-[var(--surface-card)] w-full pl-10 pr-4 py-2.5 text-sm border border-[var(--border)] rounded-lg focus:outline-none focus:border-[#044b46]/40">
         </div>
 
         <select name="status" onchange="this.form.submit()"
-                class="text-sm border border-[var(--border)] rounded-lg px-3.5 py-2.5 bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40">
+                class="col-span-2 sm:col-auto w-full sm:w-auto text-sm border border-[var(--border)] rounded-lg px-3.5 py-2.5 bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40">
             <option value="all" {{ $status === 'all' ? 'selected' : '' }}>Status: Semua</option>
             <option value="active" {{ $status === 'active' ? 'selected' : '' }}>Aktif</option>
             <option value="past_due" {{ $status === 'past_due' ? 'selected' : '' }}>Jatuh Tempo</option>

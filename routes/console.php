@@ -15,7 +15,7 @@ Artisan::command('inspire', function () {
 // (Supervisor) - queue didorong lewat cron schedule:run tiap menit sebagai
 // gantinya, --stop-when-empty supaya proses keluar begitu antrean kosong
 // alih-alih jalan terus dan bentrok dengan invocation menit berikutnya.
-Schedule::command('queue:work --stop-when-empty')->everyMinute();
+Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')->everyMinute()->withoutOverlapping(2);
 
 // services/delay-risk-api/ di-host di PythonAnywhere free tier, yang
 // nonaktifkan web app-nya kalau tidak ada yang login & reactivate berkala.

@@ -12,15 +12,15 @@
 <div class="mb-5">
     <h2 class="font-display text-base font-semibold text-[var(--text-primary)] mb-3">Ringkasan Tim &middot; Tren 6 Bulan Terakhir</h2>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div class="card p-5">
+        <div class="card p-4 sm:p-5">
             <p class="font-display text-sm font-semibold text-[var(--text-primary)] mb-2">Rata-rata Nilai KPI</p>
             <x-kpi-trend-line :trend="$teamTrend['kpi']" />
         </div>
-        <div class="card p-5">
+        <div class="card p-4 sm:p-5">
             <p class="font-display text-sm font-semibold text-[var(--text-primary)] mb-2">Ketepatan Kerja Tim</p>
             <x-kpi-trend-line :trend="$teamTrend['timeliness']" />
         </div>
-        <div class="card p-5">
+        <div class="card p-4 sm:p-5">
             <p class="font-display text-sm font-semibold text-[var(--text-primary)] mb-2">Kualitas Kerja Tim</p>
             <x-kpi-trend-line :trend="$teamTrend['quality']" />
         </div>
@@ -28,7 +28,7 @@
 </div>
 
 {{-- Perbandingan Nilai KPI Antar Anggota --}}
-<div class="card p-5 mb-5">
+<div class="card p-4 sm:p-5 mb-4 sm:mb-5">
     <h2 class="font-display text-base font-semibold text-[var(--text-primary)] mb-1">Perbandingan Nilai KPI Anggota</h2>
     <p class="text-xs text-[var(--text-muted)] mb-3">Periode {{ $periodStart->translatedFormat('F Y') }}, diurutkan dari nilai tertinggi.</p>
     <x-kpi-comparison-bar :trend="$comparisonChart" />
@@ -36,8 +36,8 @@
 
 {{-- Ketepatan Prediksi Risiko Tinggi (AI Delay Risk) - header konsisten
      dengan kartu "Akurasi Prediksi AI" di Dashboard (teaser fitur yang sama). --}}
-<div class="card p-6 mb-5">
-    <div class="flex items-center gap-3 mb-4">
+<div class="card p-4 sm:p-6 mb-4 sm:mb-5">
+    <div class="flex items-start sm:items-center gap-3 mb-4">
         <div class="w-9 h-9 rounded-lg bg-[var(--info-tint)] flex items-center justify-center shrink-0">
             <span class="material-symbols-outlined text-[var(--info-text)] text-[18px]">verified</span>
         </div>

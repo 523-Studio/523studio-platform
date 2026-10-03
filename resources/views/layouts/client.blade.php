@@ -14,7 +14,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..500,0..1&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -28,8 +28,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         @include('partials._theme-tokens')
-        body { font-family: 'Inter', sans-serif; background-color: var(--surface-page); color: var(--text-primary); }
-        .font-display { font-family: 'Fraunces', serif; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--surface-page); color: var(--text-primary); }
+        .font-display { font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.01em;}
         .material-symbols-outlined { font-family: 'Material Symbols Outlined'; font-weight: normal; font-style: normal; }
 
         {{-- Flatpickr dark-mode override, sama persis dengan layouts/app.blade.php --}}

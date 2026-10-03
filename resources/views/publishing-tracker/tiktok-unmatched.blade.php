@@ -8,7 +8,7 @@
                 <span class="material-symbols-outlined text-[19px]">arrow_back</span>
             </a>
             <div>
-                <h1 class="font-display text-[26px] font-semibold text-[var(--text-primary)]">Unmatched TikTok Video</h1>
+                <h1 class="font-display text-[22px] sm:text-[26px] font-semibold text-[var(--text-primary)]">Unmatched TikTok Video</h1>
                 <p class="text-sm text-[var(--text-muted)] mt-0.5">
                     {{ $apiIntegration->client->name }} &middot; &commat;{{ $apiIntegration->external_username ?? '-' }}
                 </p>
@@ -53,7 +53,7 @@
                         {{-- id="post-{external_post_id}" - konsisten dengan pola
                              Instagram, dipakai action "Hubungkan Konten" dari
                              Performance Table/Top Content buat preselect. --}}
-                        <div id="post-{{ $media['id'] }}" class="p-5 flex flex-col sm:flex-row sm:items-start gap-4 scroll-mt-4"
+                        <div id="post-{{ $media['id'] }}" class="p-4 sm:p-5 flex flex-wrap sm:flex-nowrap sm:items-start gap-3 sm:gap-4 scroll-mt-4"
                              x-data="{ open: false, preselected: window.location.hash === '#post-{{ $media['id'] }}' }"
                              x-init="if (preselected) { open = true; $nextTick(() => $el.scrollIntoView({ behavior: 'smooth', block: 'center' })) }"
                              :class="preselected ? 'ring-2 ring-[var(--brand)] rounded-lg' : ''">
@@ -67,7 +67,7 @@
                                 @endif
                             </div>
 
-                            <div class="flex-1 min-w-0">
+                            <div class="flex-1 basis-[calc(100%-5rem)] sm:basis-0 min-w-0">
                                 <p class="text-sm text-[var(--text-primary)] line-clamp-2">{{ $media['caption'] }}</p>
                                 <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-xs text-[var(--text-muted)]">
                                     <span>{{ $media['timestamp']?->translatedFormat('d M Y, H:i') ?? '-' }}</span>
@@ -87,7 +87,7 @@
                             </div>
 
                             <button type="button" @click="open = !open"
-                                    class="text-xs font-medium text-white bg-[var(--brand)] px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity shrink-0 self-start">
+                                    class="text-xs font-medium text-white bg-[var(--brand)] px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity shrink-0 self-start ml-auto sm:ml-0">
                                 Link to Content
                             </button>
 

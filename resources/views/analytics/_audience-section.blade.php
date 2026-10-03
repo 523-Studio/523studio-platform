@@ -58,8 +58,8 @@
 
             <div class="flex items-center gap-3 flex-wrap">
                 <input type="file" name="file" accept=".csv,.txt" required
-                       class="text-sm border border-[var(--border)] rounded-lg px-3.5 py-2 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-[var(--brand-tint)] file:text-[var(--brand)] file:text-xs file:font-medium">
-                <button type="submit" class="btn-primary">
+                       class="w-full sm:w-auto min-w-0 max-w-full text-sm border border-[var(--border)] rounded-lg px-3.5 py-2 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-[var(--brand-tint)] file:text-[var(--brand)] file:text-xs file:font-medium">
+                <button type="submit" class="btn-primary w-full sm:w-auto">
                     Upload &amp; Import
                 </button>
             </div>

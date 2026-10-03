@@ -4,13 +4,13 @@
 
 <div class="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
 
-    <div class="flex items-center gap-3 mb-7">
+    <div class="flex items-center gap-3 mb-5 sm:mb-7">
         <a href="{{ route('client-management.index') }}"
            class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[var(--surface-card)] text-[var(--text-secondary)] transition-colors shrink-0">
             <span class="material-symbols-outlined text-[19px]">arrow_back</span>
         </a>
-        <div>
-            <h1 class="font-display text-2xl font-semibold text-[var(--text-primary)]">Tambah Klien Baru</h1>
+        <div class="min-w-0">
+            <h1 class="font-display text-xl sm:text-2xl font-semibold text-[var(--text-primary)]">Tambah Klien Baru</h1>
             <p class="text-sm text-[var(--text-muted)] mt-0.5">Link Portal Klien otomatis tersedia begitu klien dibuat.</p>
         </div>
     </div>
@@ -18,7 +18,7 @@
     <form action="{{ route('client-management.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
         @csrf
 
-        <div class="card p-6">
+        <div class="card p-4 sm:p-6">
             <p class="text-sm font-semibold text-[var(--text-primary)] mb-5 flex items-center gap-2">
                 <span class="material-symbols-outlined text-[var(--brand)] text-[19px]">apartment</span>
                 Informasi Perusahaan
@@ -42,7 +42,7 @@
                                 <input id="logo" type="file" name="logo" accept="image/*" class="hidden"
                                        x-on:change="const f = $event.target.files[0]; if (f) preview = URL.createObjectURL(f)">
                             </label>
-                            <p class="text-[11px] text-[var(--text-muted)] mt-1.5">PNG/JPG, maks 2MB. Opsional — kalau kosong, dipakai inisial nama brand.</p>
+                            <p class="text-[11px] text-[var(--text-muted)] mt-1.5">PNG/JPG, maks 2MB. Opsional, kalau kosong, dipakai inisial nama brand.</p>
                         </div>
                     </div>
                     @error('logo') <p class="text-[var(--danger-text)] text-xs mt-1.5">{{ $message }}</p> @enderror

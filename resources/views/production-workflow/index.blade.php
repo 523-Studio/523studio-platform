@@ -23,28 +23,30 @@
 <div class="flex flex-col {{ ($tab === 'board' && ($view ?? 'board') === 'board') ? 'h-[calc(100vh-64px)]' : '' }}">
 
     <header class="px-4 sm:px-6 lg:px-8 pt-5 flex-shrink-0">
-        <div class="flex items-center justify-between mb-4">
-            <div>
-                <h1 class="font-display text-[26px] sm:text-[32px] font-semibold text-[var(--text-primary)]">Produksi</h1>
-                <p class="text-[var(--text-secondary)] text-sm mt-1">Alur produksi, revisi, dan riwayat tayang konten.</p>
+        <div class="flex items-center justify-between gap-3 mb-3 sm:mb-4">
+            <div class="min-w-0">
+                <h1 class="font-display text-[22px] sm:text-[32px] font-semibold text-[var(--text-primary)] leading-tight">Produksi</h1>
+                <p class="text-[var(--text-secondary)] text-xs sm:text-sm mt-1">Alur produksi, revisi, dan riwayat tayang konten.</p>
             </div>
         </div>
 
-        {{-- Tab switcher --}}
-        <div class="flex items-center h-10 bg-[var(--surface-muted)] rounded-lg p-1 w-fit mb-5">
-            <a href="{{ route('production-workflow.index') }}"
-               class="flex items-center h-full text-xs font-medium px-4 rounded-md transition-colors {{ $tab === 'board' ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]' }}">
-                Papan Alur Produksi
-            </a>
-            <a href="{{ route('production-workflow.index', ['tab' => 'revisions']) }}"
-               class="flex items-center h-full text-xs font-medium px-4 rounded-md transition-colors {{ $tab === 'revisions' ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]' }}">
-                Revisi
-            </a>
-            <a href="{{ route('production-workflow.index', ['tab' => 'published']) }}"
-               class="flex items-center h-full text-xs font-medium px-4 rounded-md transition-colors {{ $tab === 'published' ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]' }}">
-                Sudah Tayang
-            </a>
-        </div>
+        {{-- Tab switcher: satu baris, bisa digeser horizontal di HP tanpa scrollbar --}}
+        <nav aria-label="Tab Produksi" class="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden mb-3 sm:mb-5">
+            <div class="inline-flex items-center h-10 min-w-max bg-[var(--surface-muted)] rounded-lg p-1">
+                <a href="{{ route('production-workflow.index') }}" @if ($tab === 'board') aria-current="page" @endif
+                   class="flex items-center h-full whitespace-nowrap shrink-0 text-xs font-medium px-3.5 sm:px-4 rounded-md transition-colors {{ $tab === 'board' ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]' }}">
+                    Papan Alur Produksi
+                </a>
+                <a href="{{ route('production-workflow.index', ['tab' => 'revisions']) }}" @if ($tab === 'revisions') aria-current="page" @endif
+                   class="flex items-center h-full whitespace-nowrap shrink-0 text-xs font-medium px-3.5 sm:px-4 rounded-md transition-colors {{ $tab === 'revisions' ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]' }}">
+                    Revisi
+                </a>
+                <a href="{{ route('production-workflow.index', ['tab' => 'published']) }}" @if ($tab === 'published') aria-current="page" @endif
+                   class="flex items-center h-full whitespace-nowrap shrink-0 text-xs font-medium px-3.5 sm:px-4 rounded-md transition-colors {{ $tab === 'published' ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]' }}">
+                    Sudah Tayang
+                </a>
+            </div>
+        </nav>
     </header>
 
     @if ($tab === 'revisions')
@@ -62,23 +64,23 @@
             @endif
         </form>
 
-        <div class="flex items-center gap-3 mb-2.5 flex-wrap">
+        <div class="grid grid-cols-2 sm:flex sm:items-center sm:flex-wrap gap-2 sm:gap-3 mb-3">
             <select name="client_id" form="filter-form" onchange="this.form.submit()"
-                    class="border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40 h-[40px]">
+                    class="w-full sm:w-auto h-10 min-w-0 border border-[var(--border)] rounded-lg px-3 text-sm bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40">
                 <option value="">Semua Klien</option>
                 @foreach ($clientOptions as $client)
                     <option value="{{ $client->id }}" {{ (string) $selectedClientId === (string) $client->id ? 'selected' : '' }}>{{ $client->name }}</option>
                 @endforeach
             </select>
 
-            <div class="relative flex-1 min-w-[160px]">
+            <div class="relative col-span-2 order-first sm:order-none sm:col-span-1 sm:flex-1 sm:min-w-[160px] sm:max-w-xs">
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-[19px]">search</span>
-                <input x-model="search" class="pl-10 pr-4 h-[40px] bg-[var(--surface-card)] border border-[var(--border)] rounded-lg text-sm focus:outline-none focus:border-[#044b46]/40 w-full sm:w-64" placeholder="Cari konten..." type="text">
+                <input x-model="search" class="pl-10 pr-4 h-10 bg-[var(--surface-card)] border border-[var(--border)] rounded-lg text-sm focus:outline-none focus:border-[#044b46]/40 w-full" placeholder="Cari konten..." type="text">
             </div>
 
             @if ($view === 'board')
                 <button type="button" @click="toggleRiskSort()"
-                        class="flex items-center gap-1.5 h-[40px] px-3.5 rounded-lg text-sm font-medium border transition-colors whitespace-nowrap"
+                        class="flex items-center justify-center gap-1.5 h-10 min-w-0 px-3 sm:px-3.5 rounded-lg text-xs sm:text-sm font-medium border transition-colors whitespace-nowrap"
                         :class="riskSortActive ? 'bg-[var(--danger-tint)] border-[var(--danger-border)] text-[var(--danger-text)]' : 'bg-[var(--surface-card)] border-[var(--border)] text-[var(--text-secondary)]'">
                     <span class="material-symbols-outlined text-[17px]">sort</span>
                     Risiko Tertinggi
@@ -86,7 +88,7 @@
             @else
                 @php $statusLabels = \App\Support\WorkflowTransitions::labels(); @endphp
                 <select name="status" form="filter-form" onchange="this.form.submit()"
-                        class="border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40 h-[40px]">
+                        class="w-full sm:w-auto h-10 min-w-0 border border-[var(--border)] rounded-lg px-3 text-sm bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40">
                     <option value="">Semua Status</option>
                     @foreach ($statuses as $status)
                         <option value="{{ $status }}" {{ $selectedStatus === $status ? 'selected' : '' }}>{{ $statusLabels[$status] ?? $status }}</option>
@@ -94,24 +96,27 @@
                 </select>
             @endif
 
-            <div class="relative">
+            <div class="relative min-w-0">
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-[17px] pointer-events-none">calendar_month</span>
                 <input type="text" name="month" form="filter-form" value="{{ $selectedMonth }}"
                        data-flatpickr="month-combined" data-autosubmit="true" placeholder="Semua Bulan"
-                       class="border border-[var(--border)] rounded-lg pl-9 pr-3 py-2 text-sm bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40 h-[40px] w-[150px]" readonly>
+                       class="border border-[var(--border)] rounded-lg pl-9 {{ $selectedMonth ? 'pr-8' : 'pr-3' }} text-sm bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40 h-10 w-full sm:w-[150px]" readonly>
+                @if ($selectedMonth)
+                    <a href="{{ request()->fullUrlWithQuery(['month' => null]) }}" title="Reset bulan" aria-label="Reset bulan"
+                       class="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]">
+                        <span class="material-symbols-outlined text-[16px]">close</span>
+                    </a>
+                @endif
             </div>
-            @if ($selectedMonth)
-                <a href="{{ request()->fullUrlWithQuery(['month' => null]) }}" class="text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)]">Reset bulan</a>
-            @endif
 
-            <div class="flex items-center h-9 bg-[var(--surface-muted)] rounded-lg p-1 sm:ml-auto">
+            <div class="flex items-center h-10 bg-[var(--surface-muted)] rounded-lg p-1 sm:ml-auto">
                 <a href="{{ request()->fullUrlWithQuery(['view' => 'board']) }}"
-                   class="flex items-center h-full text-xs font-medium px-3 rounded-md {{ $view === 'board' ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)]' }}">
-                    <span class="material-symbols-outlined text-[15px] align-middle">view_kanban</span> Papan
+                   class="flex flex-1 sm:flex-none items-center justify-center gap-0.5 h-full whitespace-nowrap text-xs font-medium px-3 rounded-md {{ $view === 'board' ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)]' }}">
+                    <span class="material-symbols-outlined text-[15px]">view_kanban</span> Papan
                 </a>
                 <a href="{{ request()->fullUrlWithQuery(['view' => 'list']) }}"
-                   class="flex items-center h-full text-xs font-medium px-3 rounded-md {{ $view === 'list' ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)]' }}">
-                    <span class="material-symbols-outlined text-[15px] align-middle">view_list</span> List
+                   class="flex flex-1 sm:flex-none items-center justify-center gap-0.5 h-full whitespace-nowrap text-xs font-medium px-3 rounded-md {{ $view === 'list' ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)]' }}">
+                    <span class="material-symbols-outlined text-[15px]">view_list</span> List
                 </a>
             </div>
         </div>

@@ -12,7 +12,7 @@
          konten di belakang overlay. --}}
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..500,0..1&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -77,13 +77,14 @@
         .numInputWrapper span.arrowDown:after { border-top-color: var(--text-muted); }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--surface-page);
             color: var(--text-primary);
         }
         .font-display {
-            font-family: 'Fraunces', serif;
-            font-optical-sizing: auto;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.01em;
         }
 
         /* Card standar - flat, border tipis, shadow super halus */

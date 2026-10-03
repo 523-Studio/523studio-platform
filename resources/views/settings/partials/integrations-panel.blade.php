@@ -42,12 +42,12 @@
         <p class="text-sm text-[var(--text-muted)]">Belum ada klien yang dapat dikelola.</p>
     </div>
 @else
-    <div class="card p-5 mb-6">
+    <div class="card p-4 sm:p-5 mb-5 sm:mb-6">
         <form method="GET" class="flex items-center gap-3 flex-wrap">
             <input type="hidden" name="tab" value="integrasi">
             <label class="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">Klien</label>
             <select name="client_id" onchange="this.form.submit()"
-                    class="text-sm border border-[var(--border)] rounded-lg px-3 py-2 bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40 min-w-[240px]">
+                    class="text-sm border border-[var(--border)] rounded-lg px-3 py-2 bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40 flex-1 sm:flex-none min-w-0 sm:min-w-[240px]">
                 @foreach ($clientOptions as $c)
                     <option value="{{ $c->id }}" {{ (string) $selectedClientId === (string) $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
                 @endforeach
@@ -58,12 +58,14 @@
 @if ($selectedClient)
 
     {{-- Integrasi Otomatis --}}
-    <div class="card p-6 mb-6">
+    <div class="card p-4 sm:p-6 mb-5 sm:mb-6">
         <h2 class="font-display text-lg font-semibold text-[var(--text-primary)] mb-1">Integrasi Otomatis</h2>
-        <p class="text-xs text-[var(--text-muted)] mb-5">Koneksi API real-time untuk {{ $selectedClient->name }}.</p>
+        <p class="text-xs text-[var(--text-muted)] mb-4 sm:mb-5">Koneksi API real-time untuk {{ $selectedClient->name }}.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
         {{-- Instagram --}}
-        <div class="border border-[var(--border)] rounded-xl p-5 mb-4">
+        <div class="h-full border border-[var(--border)] rounded-xl p-4 sm:p-5 min-w-0">
             <div class="flex items-center justify-between mb-1">
                 <p class="text-sm font-semibold text-[var(--text-primary)]">Instagram</p>
                 @if ($instagramCard['connected'])
@@ -133,8 +135,8 @@
                              analytics-sync-panel.js. --}}
                         <details class="text-xs mt-3">
                             <summary class="cursor-pointer text-[var(--brand)] font-medium select-none">Sinkronisasi Konten Historis</summary>
-                            <div class="mt-2 flex items-center gap-2">
-                                <form id="ig-historical-form" action="{{ route('settings.sync-instagram') }}" method="POST" class="flex items-center gap-2">
+                            <div class="mt-2 flex items-center gap-2 flex-wrap">
+                                <form id="ig-historical-form" action="{{ route('settings.sync-instagram') }}" method="POST" class="flex items-center gap-2 flex-wrap">
                                     @csrf
                                     <input type="hidden" name="client_id" value="{{ $selectedClient->id }}">
                                     <input type="month" name="month" required max="{{ now()->format('Y-m') }}"
@@ -179,7 +181,7 @@
              menyediakan demografis - lihat docs/TIKTOK_INTEGRATION.md).
              follower_count (kalau scope user.info.stats granted) tampil
              ringkas di dalam kartu Content Analytics, bukan card terpisah. --}}
-        <div class="border border-[var(--border)] rounded-xl p-5">
+        <div class="h-full border border-[var(--border)] rounded-xl p-4 sm:p-5 min-w-0">
             <div class="flex items-center justify-between mb-1">
                 <p class="text-sm font-semibold text-[var(--text-primary)]">TikTok</p>
                 @if ($tiktokCard['connected'])
@@ -228,8 +230,8 @@
                              lengkap di sana. --}}
                         <details class="text-xs mt-3">
                             <summary class="cursor-pointer text-[var(--brand)] font-medium select-none">Sinkronisasi Konten Historis</summary>
-                            <div class="mt-2 flex items-center gap-2">
-                                <form id="tt-historical-form" action="{{ route('settings.sync-tiktok') }}" method="POST" class="flex items-center gap-2">
+                            <div class="mt-2 flex items-center gap-2 flex-wrap">
+                                <form id="tt-historical-form" action="{{ route('settings.sync-tiktok') }}" method="POST" class="flex items-center gap-2 flex-wrap">
                                     @csrf
                                     <input type="hidden" name="client_id" value="{{ $selectedClient->id }}">
                                     <input type="month" name="month" required max="{{ now()->format('Y-m') }}"
@@ -267,12 +269,13 @@
                 </p>
             @endif
         </div>
+        </div>
     </div>
 
     {{-- Import Data Manual - dipisah jelas dari Integrasi Otomatis di
          atas, biar nggak kecampur seolah CSV = API (Langkah 12). --}}
     @if ($canManageSettings)
-        <div class="card p-6 mb-6">
+        <div class="card p-4 sm:p-6 mb-5 sm:mb-6">
             <h2 class="font-display text-lg font-semibold text-[var(--text-primary)] mb-1">Import Data Manual</h2>
             <p class="text-xs text-[var(--text-muted)] mb-4">Fallback manual - dipakai kalau API belum tersedia atau perlu isi data historis di luar jangkauan API.</p>
             <div class="flex items-center gap-3 flex-wrap">
@@ -291,7 +294,7 @@
 {{-- Sync Log - default scoped ke client yang dipilih (Langkah 13), "All
      Clients" tetap boleh diakses eksplisit lewat link. --}}
 <div class="card overflow-hidden">
-    <div class="p-6 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div class="p-4 sm:p-6 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
             <h2 class="font-display text-lg font-semibold text-[var(--text-primary)]">Log Sinkronisasi</h2>
             <p class="text-xs text-[var(--text-muted)] mt-0.5">
@@ -299,11 +302,11 @@
             </p>
         </div>
 
-        <form method="GET" class="flex items-center gap-2.5 flex-wrap">
+        <form method="GET" class="grid grid-cols-2 sm:flex sm:items-center gap-2.5 sm:flex-wrap">
             <input type="hidden" name="tab" value="integrasi">
             <input type="hidden" name="client_id" value="{{ $selectedClientId }}">
             <select name="status" onchange="this.form.submit()"
-                    class="text-sm border border-[var(--border)] rounded-lg px-3 bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40 h-[40px]">
+                    class="text-sm border border-[var(--border)] rounded-lg px-3 bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40 h-[40px] w-full sm:w-auto">
                 <option value="">Semua Status</option>
                 <option value="success" {{ request('status') === 'success' ? 'selected' : '' }}>Berhasil</option>
                 <option value="failed" {{ request('status') === 'failed' ? 'selected' : '' }}>Gagal</option>
@@ -312,18 +315,18 @@
             <div class="relative">
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-[17px] pointer-events-none">calendar_month</span>
                 <input type="text" name="date" value="{{ request('date') }}" data-flatpickr="date" data-autosubmit="true" autocomplete="off"
-                       class="border border-[var(--border)] rounded-lg pl-9 pr-3 text-sm bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40 h-[40px] w-[150px]" readonly>
+                       class="border border-[var(--border)] rounded-lg pl-9 pr-3 text-sm bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40 h-[40px] w-full sm:w-[150px]" readonly>
             </div>
             @if ($logsAllClients)
                 <input type="hidden" name="all_clients" value="1">
                 <a href="{{ route('settings', array_merge(['tab' => 'integrasi', 'client_id' => $selectedClientId], request()->only(['status', 'date']))) }}"
-                   class="text-xs text-[var(--brand)] font-medium hover:underline">Kembali ke {{ $selectedClient->name ?? 'client ini' }}</a>
+                   class="col-span-2 sm:col-auto text-xs text-[var(--brand)] font-medium hover:underline">Kembali ke {{ $selectedClient->name ?? 'client ini' }}</a>
             @else
                 <a href="{{ route('settings', array_merge(['tab' => 'integrasi', 'all_clients' => 1], request()->only(['status', 'date']))) }}"
-                   class="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]">Semua Klien</a>
+                   class="col-span-2 sm:col-auto text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]">Semua Klien</a>
             @endif
             @if (request('status') || request('date'))
-                <a href="{{ route('settings', ['tab' => 'integrasi', 'client_id' => $selectedClientId, 'all_clients' => $logsAllClients ? 1 : null]) }}" class="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]">Atur Ulang</a>
+                <a href="{{ route('settings', ['tab' => 'integrasi', 'client_id' => $selectedClientId, 'all_clients' => $logsAllClients ? 1 : null]) }}" class="col-span-2 sm:col-auto text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]">Atur Ulang</a>
             @endif
         </form>
     </div>
@@ -416,7 +419,7 @@
             @endforeach
         </div>
 
-        <div class="px-6 py-4 border-t border-[var(--surface-muted)]">{{ $syncLogs->links() }}</div>
+        <div class="px-4 sm:px-6 py-4 border-t border-[var(--surface-muted)]">{{ $syncLogs->links() }}</div>
     @endif
 </div>
 

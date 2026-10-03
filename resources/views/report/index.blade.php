@@ -4,7 +4,7 @@
 
 <div class="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto">
 
-    <div class="mb-7">
+    <div class="mb-5 sm:mb-7">
         <h1 class="font-display text-[26px] sm:text-[32px] font-semibold text-[var(--text-primary)]">Laporan</h1>
         <p class="text-[var(--text-secondary)] text-sm mt-1">Generate laporan progres operasional atau performa konten, siap dikirim ke klien.</p>
     </div>
@@ -16,17 +16,17 @@
         </div>
     @endif
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 mb-5">
 
         {{-- Laporan Progres Operasional --}}
-        <div class="card p-6">
+        <div class="card p-4 sm:p-6">
             <div class="flex items-center gap-3 mb-1">
-                <div class="w-9 h-9 rounded-lg bg-[var(--info-tint)] flex items-center justify-center">
+                <div class="w-9 h-9 rounded-lg bg-[var(--info-tint)] flex items-center justify-center shrink-0">
                     <span class="material-symbols-outlined text-[var(--info-text)] text-[18px]">fact_check</span>
                 </div>
                 <h2 class="text-sm font-semibold text-[var(--text-primary)]">Laporan Progres Operasional</h2>
             </div>
-            <p class="text-xs text-[var(--text-muted)] mb-5 ml-12">Jumlah konten selesai, overdue, dan revisi.</p>
+            <p class="text-xs text-[var(--text-muted)] mb-4 sm:mb-5 ml-12">Jumlah konten selesai, overdue, dan revisi.</p>
 
             <form action="{{ route('report.generate') }}" method="POST" class="space-y-4">
                 @csrf
@@ -54,25 +54,25 @@
                 <div class="flex gap-3 pt-1">
                     <button type="submit" name="format" value="pdf"
                             class="flex-1 bg-[var(--info-solid)] text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-[var(--info-dark)] transition-colors flex items-center justify-center gap-1.5">
-                        <span class="material-symbols-outlined text-[15px]">picture_as_pdf</span> Ekspor PDF
+                        <span class="material-symbols-outlined text-[15px]">picture_as_pdf</span> <span class="sm:hidden">PDF</span><span class="hidden sm:inline">Ekspor PDF</span>
                     </button>
                     <button type="submit" name="format" value="excel"
                             class="btn-secondary flex-1">
-                        <span class="material-symbols-outlined text-[15px]">table_view</span> Ekspor Excel
+                        <span class="material-symbols-outlined text-[15px]">table_view</span> <span class="sm:hidden">Excel</span><span class="hidden sm:inline">Ekspor Excel</span>
                     </button>
                 </div>
             </form>
         </div>
 
         {{-- Laporan Performa Konten --}}
-        <div class="card p-6">
+        <div class="card p-4 sm:p-6">
             <div class="flex items-center gap-3 mb-1">
-                <div class="w-9 h-9 rounded-lg bg-[var(--brand-tint)] flex items-center justify-center">
+                <div class="w-9 h-9 rounded-lg bg-[var(--brand-tint)] flex items-center justify-center shrink-0">
                     <span class="material-symbols-outlined text-[var(--brand)] text-[18px]">trending_up</span>
                 </div>
                 <h2 class="text-sm font-semibold text-[var(--text-primary)]">Laporan Performa Konten</h2>
             </div>
-            <p class="text-xs text-[var(--text-muted)] mb-5 ml-12">Views, engagement rate, top content &amp; breakdown platform.</p>
+            <p class="text-xs text-[var(--text-muted)] mb-4 sm:mb-5 ml-12">Views, engagement rate, top content &amp; breakdown platform.</p>
 
             <form action="{{ route('report.generate-performance') }}" method="POST" class="space-y-4">
                 @csrf
@@ -100,11 +100,11 @@
                 <div class="flex gap-3 pt-1">
                     <button type="submit" name="format" value="pdf"
                             class="btn-primary flex-1">
-                        <span class="material-symbols-outlined text-[15px]">picture_as_pdf</span> Ekspor PDF
+                        <span class="material-symbols-outlined text-[15px]">picture_as_pdf</span> <span class="sm:hidden">PDF</span><span class="hidden sm:inline">Ekspor PDF</span>
                     </button>
                     <button type="submit" name="format" value="excel"
                             class="btn-secondary flex-1">
-                        <span class="material-symbols-outlined text-[15px]">table_view</span> Ekspor Excel
+                        <span class="material-symbols-outlined text-[15px]">table_view</span> <span class="sm:hidden">Excel</span><span class="hidden sm:inline">Ekspor Excel</span>
                     </button>
                 </div>
             </form>
@@ -114,12 +114,12 @@
 
     {{-- Riwayat --}}
     <div class="card overflow-hidden">
-        <div class="p-6 pb-0 flex items-center justify-between flex-wrap gap-2">
+        <div class="p-4 sm:p-6 pb-0 flex items-center justify-between flex-wrap gap-2">
             <h2 class="font-display text-lg font-semibold text-[var(--text-primary)]">Riwayat Laporan</h2>
             <span class="text-xs text-[var(--text-muted)]">{{ $reports->count() }} laporan</span>
         </div>
 
-        <div class="p-6">
+        <div class="p-4 sm:p-6">
             @if ($reports->isEmpty())
                 <div class="flex flex-col items-center justify-center py-10 text-center">
                     <span class="material-symbols-outlined text-[var(--icon-disabled)] text-[24px] mb-2">description</span>

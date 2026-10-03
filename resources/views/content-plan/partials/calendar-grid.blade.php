@@ -44,52 +44,52 @@
     @endphp
 
     {{-- Filter Calendar: Tipe & Tanggal digabung berdekatan --}}
-    <div class="flex items-center gap-6 mb-4 flex-wrap">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2 sm:gap-6 mb-3 sm:mb-4">
 
-        <div class="flex items-center gap-2">
-            <span class="text-xs font-medium text-[var(--text-muted)]">Tipe:</span>
+        <div class="flex items-center gap-2 overflow-x-auto sm:overflow-visible -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <span class="text-xs font-medium text-[var(--text-muted)] shrink-0">Tipe:</span>
 
-            <a href="{{ request()->fullUrlWithQuery(['view' => 'calendar', 'type' => 'all', 'date' => null]) }}" class="px-3 py-1.5 rounded-lg text-xs font-medium
+            <a href="{{ request()->fullUrlWithQuery(['view' => 'calendar', 'type' => 'all', 'date' => null]) }}" class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium
                {{ ($selectedType ?? 'all') === 'all' ? 'bg-[var(--brand-solid)] text-white' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]' }}">
                 Semua
             </a>
 
             <a href="{{ request()->fullUrlWithQuery(['view' => 'calendar', 'type' => 'Desain']) }}"
-               class="group relative overflow-hidden flex items-center justify-center h-8 w-8 hover:w-[4.5rem] rounded-lg text-xs font-medium transition-[width] duration-300 ease-out
+               class="group relative overflow-hidden shrink-0 flex items-center justify-center h-8 w-8 hover:w-[4.5rem] rounded-lg text-xs font-medium transition-[width] duration-300 ease-out
                {{ ($selectedType ?? '') === 'Desain' ? 'bg-[var(--brand-solid)] text-white' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]' }}">
                 <span class="absolute transition-opacity duration-150 group-hover:opacity-0">D</span>
                 <span class="absolute whitespace-nowrap opacity-0 transition-opacity duration-200 delay-150 group-hover:opacity-100">Desain</span>
             </a>
 
             <a href="{{ request()->fullUrlWithQuery(['view' => 'calendar', 'type' => 'Video']) }}"
-               class="group relative overflow-hidden flex items-center justify-center h-8 w-8 hover:w-[4.5rem] rounded-lg text-xs font-medium transition-[width] duration-300 ease-out
+               class="group relative overflow-hidden shrink-0 flex items-center justify-center h-8 w-8 hover:w-[4.5rem] rounded-lg text-xs font-medium transition-[width] duration-300 ease-out
                {{ ($selectedType ?? '') === 'Video' ? 'bg-[var(--brand-solid)] text-white' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]' }}">
                 <span class="absolute transition-opacity duration-150 group-hover:opacity-0">V</span>
                 <span class="absolute whitespace-nowrap opacity-0 transition-opacity duration-200 delay-150 group-hover:opacity-100">Video</span>
             </a>
         </div>
 
-        <div class="flex items-center gap-2">
-            <span class="text-xs font-medium text-[var(--text-muted)]">Status:</span>
+        <div class="flex items-center gap-2 overflow-x-auto sm:overflow-visible -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <span class="text-xs font-medium text-[var(--text-muted)] shrink-0">Status:</span>
 
-            <a href="{{ request()->fullUrlWithQuery(['view' => 'calendar', 'status' => 'all']) }}" class="px-3 py-1.5 rounded-lg text-xs font-medium
+            <a href="{{ request()->fullUrlWithQuery(['view' => 'calendar', 'status' => 'all']) }}" class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium
                {{ ($selectedStatus ?? 'all') === 'all' ? 'bg-[var(--brand-solid)] text-white' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]' }}">
                 Semua
             </a>
 
-            <a href="{{ request()->fullUrlWithQuery(['view' => 'calendar', 'status' => 'done']) }}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
+            <a href="{{ request()->fullUrlWithQuery(['view' => 'calendar', 'status' => 'done']) }}" class="shrink-0 whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
                {{ ($selectedStatus ?? '') === 'done' ? 'bg-[var(--brand-solid)] text-white' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]' }}">
                 <span class="material-symbols-outlined text-[14px] shrink-0" style="color: {{ ($selectedStatus ?? '') === 'done' ? '#fff' : '#0f7a5f' }}">check_circle</span>
                 Sudah Dikerjakan
             </a>
 
-            <a href="{{ request()->fullUrlWithQuery(['view' => 'calendar', 'status' => 'not_done']) }}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
+            <a href="{{ request()->fullUrlWithQuery(['view' => 'calendar', 'status' => 'not_done']) }}" class="shrink-0 whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
                {{ ($selectedStatus ?? '') === 'not_done' ? 'bg-[var(--brand-solid)] text-white' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]' }}">
                 <span class="material-symbols-outlined text-[14px] shrink-0" style="color: {{ ($selectedStatus ?? '') === 'not_done' ? '#fff' : '#9aa0a4' }}">radio_button_unchecked</span>
                 Belum Dikerjakan
             </a>
 
-            <a href="{{ request()->fullUrlWithQuery(['view' => 'calendar', 'status' => 'late']) }}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
+            <a href="{{ request()->fullUrlWithQuery(['view' => 'calendar', 'status' => 'late']) }}" class="shrink-0 whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
                {{ ($selectedStatus ?? '') === 'late' ? 'bg-[var(--brand-solid)] text-white' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]' }}">
                 <span class="material-symbols-outlined text-[14px] shrink-0" style="color: {{ ($selectedStatus ?? '') === 'late' ? '#fff' : '#c0392b' }}">error</span>
                 Telat Dikerjakan
@@ -99,9 +99,9 @@
     </div>
 
     {{-- Legenda warna client --}}
-    <div class="flex flex-wrap gap-3 mb-2">
+    <div class="flex gap-3 mb-2 overflow-x-auto sm:overflow-visible sm:flex-wrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         @foreach ($clientOptions as $c)
-            <span class="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
+            <span class="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] whitespace-nowrap shrink-0">
                 <span class="w-2.5 h-2.5 rounded-full"
                     style="background-color: {{ $c->color ?? $fallbackColor($c->id) }}"></span>
                 {{ $c->name }}
@@ -110,7 +110,7 @@
     </div>
 
     {{-- Legenda ikon status tiap item kalender --}}
-    <div class="flex flex-wrap gap-4 mb-4">
+    <div class="flex flex-wrap gap-x-4 gap-y-1 mb-3 sm:mb-4">
         <span class="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
             <span class="material-symbols-outlined text-[15px]" style="color: #0f7a5f">check_circle</span> Sudah Dikerjakan
         </span>

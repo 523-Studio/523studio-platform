@@ -17,8 +17,8 @@
         showCreateModal: {{ $errors->inviteUser->any() ? 'true' : 'false' }}
     }" class="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto">
 
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-        <div>
+    <div class="flex items-center justify-between gap-3 mb-4 sm:mb-5">
+        <div class="min-w-0">
             <h1 class="font-display text-[26px] sm:text-[32px] font-semibold text-[var(--text-primary)]">Kelola Pengguna</h1>
             <p class="text-[var(--text-secondary)] text-sm mt-1">
                 Kelola siapa saja yang punya akses ke dashboard ini. Akun harus didaftarkan di sini dulu sebelum orang tersebut bisa login.
@@ -27,9 +27,9 @@
 
         @if (auth()->user()->hasPermissionTo('user_management', 'manage'))
             <button type="button" @click="showCreateModal = true"
-               class="self-start btn-primary">
+               class="btn-primary ml-auto shrink-0 !px-3 !py-2 sm:!px-5 sm:!py-2.5">
                 <span class="material-symbols-outlined text-[17px]">person_add</span>
-                Tambah Pengguna
+                <span class="sm:hidden">Tambah</span><span class="hidden sm:inline">Tambah Pengguna</span>
             </button>
         @endif
     </div>

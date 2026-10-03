@@ -3,16 +3,18 @@
 @section('content')
 <div x-data="{ showCreateModal: {{ $errors->createContentPlan->any() ? 'true' : 'false' }} }" class="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto">
 
-    {{-- Bagian atas — TETAP, tidak berubah saat switch --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-7">
-        <div>
-            <h1 class="font-display text-[26px] sm:text-[32px] font-semibold text-[var(--text-primary)]">Rencana Konten</h1>
-            <p class="text-[var(--text-secondary)] text-sm mt-1">Kelola dan pantau target konten seluruh client aktif.</p>
+    {{-- Bagian atas, tetap saat switch. Judul kiri, aksi utama rata kanan di baris yang sama. --}}
+    <div class="flex items-center justify-between gap-3 mb-5 sm:mb-7">
+        <div class="min-w-0">
+            <h1 class="font-display text-[22px] sm:text-[32px] font-semibold text-[var(--text-primary)] leading-tight">Rencana Konten</h1>
+            <p class="text-[var(--text-secondary)] text-xs sm:text-sm mt-1">Kelola dan pantau target konten seluruh client aktif.</p>
         </div>
         @if (auth()->user()->hasPermissionTo('content_plan', 'create'))
-            <div class="flex items-center gap-2 flex-wrap">
-                <button type="button" @click="showCreateModal = true" class="btn-primary">
-                    <span class="material-symbols-outlined text-[17px]">add</span> Buat Rencana Konten Baru
+            <div class="ml-auto shrink-0">
+                <button type="button" @click="showCreateModal = true" class="btn-primary !px-3 !py-2 text-[13px] sm:!px-5 sm:!py-2.5 sm:text-sm whitespace-nowrap">
+                    <span class="material-symbols-outlined text-[17px]">add</span>
+                    <span class="sm:hidden">Buat Rencana</span>
+                    <span class="hidden sm:inline">Buat Rencana Konten Baru</span>
                 </button>
             </div>
         @endif
@@ -22,11 +24,11 @@
         <div class="bg-[var(--brand-tint)] text-[var(--brand)] text-sm p-3.5 rounded-lg mb-5">{{ session('status') }}</div>
     @endif
 
-    {{-- Filter — TETAP, plus toggle Table/Calendar di ujung kanan --}}
-    <form method="GET" class="flex items-center gap-3 mb-6 flex-wrap">
+    {{-- Filter, plus toggle Table/Calendar. HP: grid 2 kolom (klien + bulan), toggle satu baris penuh. --}}
+    <form method="GET" class="grid grid-cols-2 sm:flex sm:items-center sm:flex-wrap gap-2 sm:gap-3 mb-5 sm:mb-6">
         <input type="hidden" name="view" value="{{ $view }}">
 
-        <select name="client_id" onchange="this.form.submit()" class="border border-[var(--border)] rounded-lg px-3.5 py-2.5 text-sm bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40">
+        <select name="client_id" onchange="this.form.submit()" class="w-full sm:w-auto h-10 min-w-0 border border-[var(--border)] rounded-lg px-3 sm:px-3.5 text-sm bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40">
             <option value="">Semua Klien</option>
             @foreach ($clientOptions as $c)
                 <option value="{{ $c->id }}" {{ (string) $selectedClientId === (string) $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
@@ -34,20 +36,20 @@
         </select>
         <input type="hidden" name="month" id="plan-month-input" value="{{ $month }}">
         <input type="hidden" name="year" id="plan-year-input" value="{{ $year }}">
-        <div class="relative">
+        <div class="relative min-w-0">
             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-[17px] pointer-events-none">calendar_month</span>
             <input type="text" data-flatpickr="month" data-month-input="#plan-month-input" data-year-input="#plan-year-input" data-autosubmit="true"
-                   class="border border-[var(--border)] rounded-lg pl-9 pr-3 py-2.5 text-sm bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40 w-[150px]" readonly>
+                   class="w-full sm:w-[150px] h-10 border border-[var(--border)] rounded-lg pl-9 pr-3 text-sm bg-[var(--surface-card)] focus:outline-none focus:border-[#044b46]/40" readonly>
         </div>
 
         {{-- Toggle Table / Calendar --}}
-        <div class="flex items-center bg-[var(--surface-muted)] rounded-lg p-1 sm:ml-auto">
+        <div class="col-span-2 flex items-center bg-[var(--surface-muted)] rounded-lg p-1 sm:ml-auto sm:w-auto">
             <a href="{{ request()->fullUrlWithQuery(['view' => 'table']) }}"
-               class="text-xs font-medium px-3 py-1.5 rounded-md {{ $view === 'table' ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)]' }}">
+               class="flex-1 sm:flex-none text-center whitespace-nowrap text-xs font-medium px-3 py-1.5 rounded-md {{ $view === 'table' ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)]' }}">
                 <span class="material-symbols-outlined text-[15px] align-middle">table_rows</span> Tabel
             </a>
             <a href="{{ request()->fullUrlWithQuery(['view' => 'calendar']) }}"
-               class="text-xs font-medium px-3 py-1.5 rounded-md {{ $view === 'calendar' ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)]' }}">
+               class="flex-1 sm:flex-none text-center whitespace-nowrap text-xs font-medium px-3 py-1.5 rounded-md {{ $view === 'calendar' ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)]' }}">
                 <span class="material-symbols-outlined text-[15px] align-middle">calendar_month</span> Kalender
             </a>
         </div>
