@@ -11,27 +11,23 @@ use Tests\TestCase;
 
 /**
  * Menjaga kontrak perilaku sidebar: tidak blink di layar kecil dan navigasi
- * sidebar yang hanya mengganti isi <main>. Skrip navigasi di layout hanya
- * boleh dipakai untuk halaman tanpa script inline, jadi tes ini memastikan
- * (1) penanda ada, (2) hanya halaman allowlist yang bertanda data-spa, dan
- * (3) halaman allowlist memang tidak punya <script> di dalam <main>.
+ * sidebar yang hanya mengganti isi <main>. Tes ini memastikan
+ * (1) penanda ada, (2) semua link sidebar bertanda data-spa, dan (3) tiap halaman
+ * sidebar merender <main id="app-main">.
  */
 class SidebarNavigationTest extends TestCase
 {
     use RefreshDatabase;
 
-    private const SPA_ROUTES = [
+    private const SIDEBAR_ROUTES = [
         'profile.me',
         'dashboard',
+        'analytics',
         'content-plan.index',
+        'production-workflow.index',
         'team-performance.index',
         'user-management.index',
         'client-management.index',
-    ];
-
-    private const FULL_RELOAD_ROUTES = [
-        'analytics',
-        'production-workflow.index',
         'report.index',
         'settings',
     ];
@@ -72,11 +68,11 @@ class SidebarNavigationTest extends TestCase
         $this->assertStringContainsString('id="app-main"', $html);
     }
 
-    public function test_only_allowlisted_sidebar_links_are_marked_spa(): void
+    public function test_every_sidebar_link_supports_navigation_without_reload(): void
     {
         $html = $this->actingAs($this->ceo())->get(route('dashboard'))->assertOk()->getContent();
 
-        foreach (self::SPA_ROUTES as $name) {
+        foreach (self::SIDEBAR_ROUTES as $name) {
             $path = parse_url(route($name), PHP_URL_PATH);
             $this->assertMatchesRegularExpression(
                 '/<a\s[^>]*data-nav-path="'.preg_quote($path, '/').'"[^>]*\sdata-spa(\s|>)/s',
@@ -84,30 +80,23 @@ class SidebarNavigationTest extends TestCase
                 "Link sidebar {$name} harus bertanda data-spa."
             );
         }
-
-        foreach (self::FULL_RELOAD_ROUTES as $name) {
-            $path = parse_url(route($name), PHP_URL_PATH);
-            $this->assertMatchesRegularExpression('/data-nav-path="'.preg_quote($path, '/').'"/', $html, "Link {$name} harus punya data-nav-path.");
-            $this->assertDoesNotMatchRegularExpression(
-                '/<a\s[^>]*data-nav-path="'.preg_quote($path, '/').'"[^>]*\sdata-spa(\s|>)/s',
-                $html,
-                "Link sidebar {$name} punya script inline, jadi TIDAK boleh data-spa."
-            );
-        }
     }
 
-    public function test_allowlisted_pages_have_no_inline_script_inside_main(): void
+    public function test_production_link_carries_mobile_query_rule(): void
+    {
+        $html = $this->actingAs($this->ceo())->get(route('dashboard'))->assertOk()->getContent();
+
+        $path = preg_quote(parse_url(route('production-workflow.index'), PHP_URL_PATH), '/');
+        $this->assertMatchesRegularExpression('/data-nav-path="'.$path.'"[^>]*data-spa-mobile-query="view=list"/s', $html);
+    }
+
+    public function test_every_sidebar_page_renders_main_container(): void
     {
         $ceo = $this->ceo();
 
-        foreach (self::SPA_ROUTES as $name) {
+        foreach (self::SIDEBAR_ROUTES as $name) {
             $html = $this->actingAs($ceo)->get(route($name))->assertOk()->getContent();
-
-            $this->assertStringNotContainsString(
-                '<script',
-                $this->mainOf($html),
-                "Halaman {$name} punya <script> di dalam <main>; keluarkan dari allowlist data-spa."
-            );
+            $this->mainOf($html);
         }
     }
 }

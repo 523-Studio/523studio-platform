@@ -586,10 +586,12 @@
 
     </div>
 
-    {{-- Navigasi sidebar tanpa reload penuh: klik menu sidebar (yang bertanda
-         data-spa) hanya mengganti isi <main>, sidebar dan topbar tetap. Aman
-         karena hanya dipakai untuk halaman yang tidak punya script inline;
-         kondisi apa pun yang meragukan jatuh ke navigasi biasa (reload penuh). --}}
+    {{-- Navigasi tanpa reload sidebar: klik menu sidebar, tab dan link yang
+         menuju halaman sidebar yang sama, serta form filter GET di dalam
+         <main>, hanya mengganti isi <main>. Sidebar dan topbar tetap di
+         tempat. Script inline halaman dijalankan ulang secara berurutan
+         (semuanya fungsi global atau IIFE, aman dijalankan ulang). Kondisi
+         apa pun yang meragukan jatuh ke navigasi biasa (reload penuh). --}}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const main = document.getElementById('app-main');
@@ -618,6 +620,58 @@
                 try { window.Alpine.$data(aside).sidebarOpen = false; } catch (e) {}
             }
 
+            function sidebarLinkFor(pathname) {
+                return aside.querySelector('a[data-spa][data-nav-path="' + pathname + '"]');
+            }
+
+            // Beberapa halaman (Produksi) punya script yang mengalihkan ke
+            // tampilan List di HP bila belum ada ?view=. Lewat navigasi tanpa
+            // reload itu akan memicu reload penuh, jadi parameternya
+            // ditambahkan lebih dulu di sini.
+            function withMobileQuery(url, link) {
+                const rule = link && link.getAttribute('data-spa-mobile-query');
+                if (rule && window.matchMedia('(max-width: 639px)').matches) {
+                    const kv = rule.split('=');
+                    if (!url.searchParams.has(kv[0])) url.searchParams.set(kv[0], kv[1]);
+                }
+                return url;
+            }
+
+            function loadScript(src) {
+                return new Promise(function (resolve, reject) {
+                    const el = document.createElement('script');
+                    el.src = src;
+                    el.onload = resolve;
+                    el.onerror = reject;
+                    document.body.appendChild(el);
+                });
+            }
+
+            // Script inline yang disisipkan lewat innerHTML tidak dieksekusi.
+            // Buat ulang satu per satu supaya jalan. Handler DOMContentLoaded
+            // yang didaftarkan script itu dijalankan langsung (event aslinya
+            // sudah lewat).
+            function runInlineScripts(container) {
+                container.querySelectorAll('script').forEach(function (old) {
+                    if (old.src) { old.remove(); return; }
+                    const pending = [];
+                    const original = document.addEventListener;
+                    document.addEventListener = function (type, fn, opts) {
+                        if (type === 'DOMContentLoaded' && typeof fn === 'function') { pending.push(fn); return; }
+                        return original.call(document, type, fn, opts);
+                    };
+                    try {
+                        const fresh = document.createElement('script');
+                        if (old.type) fresh.type = old.type;
+                        fresh.text = old.textContent;
+                        old.replaceWith(fresh);
+                    } finally {
+                        document.addEventListener = original;
+                    }
+                    pending.forEach(function (fn) { fn(); });
+                });
+            }
+
             async function go(url, mode) {
                 if (controller) controller.abort();
                 const mine = controller = new AbortController();
@@ -632,16 +686,24 @@
                     if (!res.ok || new URL(res.url).pathname !== target.pathname) throw new Error('fallback');
                     const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
                     const next = doc.getElementById('app-main');
-                    if (!next || next.querySelector('script')) throw new Error('fallback');
+                    if (!next) throw new Error('fallback');
+
+                    for (const s of next.querySelectorAll('script[src]')) {
+                        const abs = new URL(s.getAttribute('src'), location.href).href;
+                        const loaded = Array.from(document.scripts).some(function (x) { return x.src === abs; });
+                        if (!loaded) await loadScript(abs);
+                    }
                     if (mine !== controller) return;
 
                     main.innerHTML = next.innerHTML;
+                    runInlineScripts(main);
                     document.title = doc.title;
-                    if (mode === 'push') history.pushState({ sidebarNav: true }, '', url);
+                    if (mode === 'push') history.pushState({ sidebarNav: true }, '', target.href);
+                    if (mode === 'replace') history.replaceState(history.state, '', target.href);
                     current = target.pathname + target.search;
                     setActive(target.pathname);
                     closeDrawer();
-                    window.scrollTo(0, 0);
+                    if (mode !== 'replace') window.scrollTo(0, 0);
                     if (window.initFlatpickrs) window.initFlatpickrs(main);
                     if (window.hideTopLoadingBar) window.hideTopLoadingBar();
                 } catch (e) {
@@ -650,15 +712,50 @@
                 }
             }
 
+            // Muat ulang halaman aktif tanpa menyentuh sidebar (dipakai panel
+            // sinkronisasi setelah selesai). Tanpa dukungan, reload biasa.
+            window.softReload = function () { go(location.href, 'replace'); };
+
+            function plainClick(e) {
+                return !e.defaultPrevented && e.button === 0 && !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey);
+            }
+
             aside.addEventListener('click', function (e) {
                 const a = e.target.closest('a[data-spa]');
-                if (!a || e.defaultPrevented || e.button !== 0) return;
-                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                if (!a || !plainClick(e)) return;
                 if (a.target && a.target !== '_self') return;
                 const url = new URL(a.href, location.href);
                 if (url.origin !== location.origin) return;
                 e.preventDefault();
-                go(url.href, 'push');
+                go(withMobileQuery(url, a).href, 'push');
+            });
+
+            main.addEventListener('click', function (e) {
+                const a = e.target.closest('a[href]');
+                if (!a || !plainClick(e)) return;
+                if ((a.target && a.target !== '_self') || a.hasAttribute('download') || a.hasAttribute('onclick') || a.hasAttribute('data-no-spa')) return;
+                const url = new URL(a.href, location.href);
+                if (url.origin !== location.origin) return;
+                const link = sidebarLinkFor(url.pathname);
+                if (!link) return;
+                if (url.hash && url.pathname + url.search === current) return;
+                e.preventDefault();
+                go(withMobileQuery(url, link).href, 'push');
+            });
+
+            main.addEventListener('submit', function (e) {
+                const form = e.target;
+                if (!form || form.tagName !== 'FORM' || e.defaultPrevented) return;
+                if ((form.method || 'get').toLowerCase() !== 'get' || form.hasAttribute('data-no-spa')) return;
+                if (form.target && form.target !== '_self') return;
+                const url = new URL(form.getAttribute('action') || location.href, location.href);
+                if (url.origin !== location.origin) return;
+                const link = sidebarLinkFor(url.pathname);
+                if (!link) return;
+                e.preventDefault();
+                const params = new URLSearchParams(new FormData(form));
+                url.search = params.toString();
+                go(withMobileQuery(url, link).href, 'push');
             });
 
             window.addEventListener('popstate', function () {

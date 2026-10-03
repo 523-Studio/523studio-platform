@@ -525,13 +525,16 @@
             if (!busy) {
                 stopPolling();
                 if (reloadOnTerminal && isTracking && (data.overall_status === 'success' || data.overall_status === 'partial' || data.overall_status === 'failed')) {
-                    setTimeout(function () { window.location.reload(); }, 900);
+                    setTimeout(function () { if (window.softReload) { window.softReload(); } else { window.location.reload(); } }, 900);
                 }
                 isTracking = false;
             }
         }
 
         function poll() {
+            // Halaman bisa diganti tanpa reload penuh (navigasi sidebar): kalau tombolnya
+            // sudah tidak ada di dokumen, berhenti supaya tidak polling tanpa tujuan.
+            if (els.button && els.button.isConnected === false) { stopPolling(); return; }
             fetch(config.urls.status + '?' + query({ client_id: config.clientId, platform_id: config.platformId }), { headers: { Accept: 'application/json' }, cache: 'no-store' })
                 .then(function (res) {
                     if (res.status === 401 || res.status === 419) {

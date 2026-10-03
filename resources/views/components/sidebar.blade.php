@@ -3,23 +3,23 @@
         [
             'label' => 'Ringkasan',
             'items' => [
-                ['label' => 'Beranda', 'route' => 'profile.me', 'spa' => true, 'icon' => 'home', 'permission' => ['workflow', 'view']],
-                ['label' => 'Dashboard', 'route' => 'dashboard', 'spa' => true, 'icon' => 'grid_view', 'permission' => ['dashboard', 'view']],
+                ['label' => 'Beranda', 'route' => 'profile.me', 'icon' => 'home', 'permission' => ['workflow', 'view']],
+                ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'grid_view', 'permission' => ['dashboard', 'view']],
                 ['label' => 'Performa', 'route' => 'analytics', 'icon' => 'monitoring', 'permission' => ['analytics', 'view']],
             ],
         ],
         [
             'label' => 'Konten',
             'items' => [
-                ['label' => 'Rencana Konten', 'route' => 'content-plan.index', 'spa' => true, 'icon' => 'event_note', 'permission' => ['content_plan', 'view']],
-                ['label' => 'Produksi', 'route' => 'production-workflow.index', 'icon' => 'folder_open', 'permission' => ['workflow', 'view']],
+                ['label' => 'Rencana Konten', 'route' => 'content-plan.index', 'icon' => 'event_note', 'permission' => ['content_plan', 'view']],
+                ['label' => 'Produksi', 'route' => 'production-workflow.index', 'spa_mobile_query' => 'view=list', 'icon' => 'folder_open', 'permission' => ['workflow', 'view']],
             ],
         ],
         [
             'label' => 'Tim',
             'items' => [
-                ['label' => 'Performa Tim', 'route' => 'team-performance.index', 'spa' => true, 'icon' => 'diversity_3', 'permission' => ['team_performance', 'view']],
-                ['label' => 'Kelola Pengguna', 'route' => 'user-management.index', 'spa' => true, 'icon' => 'manage_accounts', 'permission' => ['user_management', 'view']],
+                ['label' => 'Performa Tim', 'route' => 'team-performance.index', 'icon' => 'diversity_3', 'permission' => ['team_performance', 'view']],
+                ['label' => 'Kelola Pengguna', 'route' => 'user-management.index', 'icon' => 'manage_accounts', 'permission' => ['user_management', 'view']],
             ],
         ],
         [
@@ -38,7 +38,7 @@
                 [
                     'label' => 'Kelola Klien',
                     'route' => 'client-management.index',
-                    'spa' => true,
+                   
                     'icon' => 'apartment',
                     'permission' => ['client', 'view'],
                     'visible' => fn ($user) => $user->hasPermissionTo('client', 'manage') || $user->canSeeAllClients(),
@@ -170,7 +170,8 @@
                             @if (Route::has($item['route']))
                                 data-nav-path="{{ parse_url(route($item['route']), PHP_URL_PATH) }}"
                             @endif
-                            @if (! empty($item['spa'])) data-spa @endif
+                            data-spa
+                            @if (! empty($item['spa_mobile_query'])) data-spa-mobile-query="{{ $item['spa_mobile_query'] }}" @endif
                             x-data="{ label: {{ Illuminate\Support\Js::from($item['label']) }} }"
                             @mouseenter="{{ $tooltipEnter }}"
                             @mouseleave="tooltip.show = false"
