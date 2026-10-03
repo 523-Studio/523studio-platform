@@ -127,6 +127,15 @@ class AnalyticsController extends Controller
             $selectedPlatformId = null;
         }
 
+        // Tab Audiens tidak pernah menggabungkan platform (demografi tiap
+        // platform berbeda), jadi butuh satu platform terpilih. Kalau klien
+        // baru cuma punya SATU platform (mis. baru Instagram, TikTok belum
+        // terhubung), pakai platform itu otomatis - tidak ada pilihan lain
+        // yang perlu diklik.
+        if ($activeTab === 'audience' && $selectedPlatformId === null && $platformOptions->count() === 1) {
+            $selectedPlatformId = $platformOptions->first()->id;
+        }
+
         // PASS 3 (Langkah N, "SYNC HISTORY") - riwayat SINGKAT (5 run
         // terakhir yang sudah selesai), server-rendered (bukan JS-polled -
         // ini histori, bukan operasi aktif), SECONDARY (disclosure kolaps,

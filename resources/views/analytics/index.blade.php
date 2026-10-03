@@ -117,9 +117,9 @@
         </select>
 
         {{-- Platform - SELALU tampil di ketiga tab biar layout nggak
-             bergeser pindah tab, walau cuma 1/0 opsi (disabled kalau
-             begitu) - lihat catatan "jangan bergeser" di audit. --}}
-        <select name="platform_id" onchange="this.form.submit()" {{ $platformOptions->count() <= 1 ? 'disabled' : '' }}
+             bergeser pindah tab. Disabled hanya kalau 0 opsi; dengan 1 opsi
+             tetap bisa dipilih (tab Audiens butuh platform terpilih). --}}
+        <select name="platform_id" onchange="this.form.submit()" {{ $platformOptions->isEmpty() ? 'disabled' : '' }}
                 class="{{ $controlClass }} w-full min-w-0 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed">
             <option value="">Semua Platform</option>
             @foreach ($platformOptions as $p)

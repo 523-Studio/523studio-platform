@@ -278,4 +278,73 @@ class AnalyticsGlobalFilterTest extends TestCase
         $response->assertSee('<option value="'.$tiktok->id.'"', false);
         $response->assertSee('>TikTok</option>', false);
     }
+
+    public function test_platform_filter_stays_enabled_when_client_has_single_platform(): void
+    {
+        $client = $this->client();
+        $manager = $this->managerFor($client);
+        $instagram = Platform::firstOrCreate(['name' => 'Instagram']);
+
+        ApiIntegration::create([
+            'client_id' => $client->id,
+            'platform_id' => $instagram->id,
+            'integration_name' => 'Instagram API (OAuth)',
+            'status' => 'active',
+            'access_token' => 'fake-token',
+            'external_username' => 'brand',
+        ]);
+
+        $html = $this->actingAs($manager)->get(route('analytics', [
+            'tab' => 'overview', 'client_id' => $client->id,
+        ]))->assertOk()->getContent();
+
+        $this->assertSame(1, preg_match('/<select name="platform_id"[^>]*>/s', $html, $m));
+        $this->assertDoesNotMatchRegularExpression('/\sdisabled(\s|>|=)/', $m[0], 'Dropdown platform tidak boleh disabled saat ada satu opsi.');
+    }
+
+    public function test_audience_tab_auto_selects_the_only_platform_of_a_new_client(): void
+    {
+        $client = $this->client();
+        $manager = $this->managerFor($client);
+        $instagram = Platform::firstOrCreate(['name' => 'Instagram']);
+
+        ApiIntegration::create([
+            'client_id' => $client->id,
+            'platform_id' => $instagram->id,
+            'integration_name' => 'Instagram API (OAuth)',
+            'status' => 'active',
+            'access_token' => 'fake-token',
+            'external_username' => 'brand',
+        ]);
+
+        $response = $this->actingAs($manager)->get(route('analytics', [
+            'tab' => 'audience', 'client_id' => $client->id,
+        ]));
+
+        $response->assertOk();
+        $response->assertDontSee('Pilih platform untuk melihat detail audiens');
+        $response->assertSee('<option value="'.$instagram->id.'" selected', false);
+    }
+
+    public function test_audience_tab_still_asks_to_choose_when_client_has_two_platforms(): void
+    {
+        $client = $this->client();
+        $manager = $this->managerFor($client);
+
+        foreach (['Instagram', 'TikTok'] as $name) {
+            $platform = Platform::firstOrCreate(['name' => $name]);
+            ApiIntegration::create([
+                'client_id' => $client->id,
+                'platform_id' => $platform->id,
+                'integration_name' => $name.' API',
+                'status' => 'active',
+                'access_token' => 'fake-token',
+                'external_username' => 'brand',
+            ]);
+        }
+
+        $this->actingAs($manager)->get(route('analytics', [
+            'tab' => 'audience', 'client_id' => $client->id,
+        ]))->assertOk()->assertSee('Pilih platform untuk melihat detail audiens');
+    }
 }
