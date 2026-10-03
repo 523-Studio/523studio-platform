@@ -245,6 +245,18 @@
                 width: 76px !important;
             }
         }
+
+        /* Sidebar di layar kecil: sebelum Alpine siap (script CDN dimuat defer),
+           kelas penyembunyi -translate-x-full belum terpasang sehingga sidebar
+           sempat terlihat lalu meluncur keluar ("blink"). Selama atribut
+           data-ready belum ada (dipasang x-init sidebar), sembunyikan lewat CSS
+           tanpa transisi. Begitu siap, aturan ini mati dan Alpine mengambil alih. */
+        @media (max-width: 1023.98px) {
+            aside[data-app-sidebar]:not([data-ready]) {
+                transform: translateX(-100%);
+                transition: none !important;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -567,12 +579,94 @@
                 </div>
             @endauth
 
-            <main class="flex-1 min-w-0">
+            <main id="app-main" class="flex-1 min-w-0">
                 @yield('content')
             </main>
         </div>
 
     </div>
+
+    {{-- Navigasi sidebar tanpa reload penuh: klik menu sidebar (yang bertanda
+         data-spa) hanya mengganti isi <main>, sidebar dan topbar tetap. Aman
+         karena hanya dipakai untuk halaman yang tidak punya script inline;
+         kondisi apa pun yang meragukan jatuh ke navigasi biasa (reload penuh). --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const main = document.getElementById('app-main');
+            const aside = document.querySelector('aside[data-app-sidebar]');
+            if (!main || !aside || !window.fetch || !window.history.pushState) return;
+
+            const ACTIVE = 'bg-[var(--brand-tint)] text-[var(--brand)]'.split(' ');
+            const INACTIVE = 'text-[var(--text-secondary)] hover:bg-[var(--surface-page)] hover:text-[var(--text-primary)]'.split(' ');
+            let controller = null;
+            let current = location.pathname + location.search;
+
+            function setActive(pathname) {
+                aside.querySelectorAll('a[data-nav-path]').forEach(function (a) {
+                    const on = a.dataset.navPath === pathname;
+                    ACTIVE.forEach(function (c) { a.classList.toggle(c, on); });
+                    INACTIVE.forEach(function (c) { a.classList.toggle(c, !on); });
+                    const icon = a.querySelector('.material-symbols-outlined');
+                    if (icon) {
+                        icon.classList.toggle('text-[var(--brand)]', on);
+                        icon.classList.toggle('text-[var(--text-muted)]', !on);
+                    }
+                });
+            }
+
+            function closeDrawer() {
+                try { window.Alpine.$data(aside).sidebarOpen = false; } catch (e) {}
+            }
+
+            async function go(url, mode) {
+                if (controller) controller.abort();
+                const mine = controller = new AbortController();
+                if (window.showTopLoadingBar) window.showTopLoadingBar();
+                try {
+                    const res = await fetch(url, {
+                        signal: mine.signal,
+                        credentials: 'same-origin',
+                        headers: { 'Accept': 'text/html' },
+                    });
+                    const target = new URL(url, location.href);
+                    if (!res.ok || new URL(res.url).pathname !== target.pathname) throw new Error('fallback');
+                    const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+                    const next = doc.getElementById('app-main');
+                    if (!next || next.querySelector('script')) throw new Error('fallback');
+                    if (mine !== controller) return;
+
+                    main.innerHTML = next.innerHTML;
+                    document.title = doc.title;
+                    if (mode === 'push') history.pushState({ sidebarNav: true }, '', url);
+                    current = target.pathname + target.search;
+                    setActive(target.pathname);
+                    closeDrawer();
+                    window.scrollTo(0, 0);
+                    if (window.initFlatpickrs) window.initFlatpickrs(main);
+                    if (window.hideTopLoadingBar) window.hideTopLoadingBar();
+                } catch (e) {
+                    if (e && e.name === 'AbortError') return;
+                    if (mode === 'push') { location.href = url; } else { location.replace(url); }
+                }
+            }
+
+            aside.addEventListener('click', function (e) {
+                const a = e.target.closest('a[data-spa]');
+                if (!a || e.defaultPrevented || e.button !== 0) return;
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                if (a.target && a.target !== '_self') return;
+                const url = new URL(a.href, location.href);
+                if (url.origin !== location.origin) return;
+                e.preventDefault();
+                go(url.href, 'push');
+            });
+
+            window.addEventListener('popstate', function () {
+                if (location.pathname + location.search === current) return;
+                go(location.href, 'pop');
+            });
+        });
+    </script>
 
 </body>
 </html>

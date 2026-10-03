@@ -3,23 +3,23 @@
         [
             'label' => 'Ringkasan',
             'items' => [
-                ['label' => 'Beranda', 'route' => 'profile.me', 'icon' => 'home', 'permission' => ['workflow', 'view']],
-                ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'grid_view', 'permission' => ['dashboard', 'view']],
+                ['label' => 'Beranda', 'route' => 'profile.me', 'spa' => true, 'icon' => 'home', 'permission' => ['workflow', 'view']],
+                ['label' => 'Dashboard', 'route' => 'dashboard', 'spa' => true, 'icon' => 'grid_view', 'permission' => ['dashboard', 'view']],
                 ['label' => 'Performa', 'route' => 'analytics', 'icon' => 'monitoring', 'permission' => ['analytics', 'view']],
             ],
         ],
         [
             'label' => 'Konten',
             'items' => [
-                ['label' => 'Rencana Konten', 'route' => 'content-plan.index', 'icon' => 'event_note', 'permission' => ['content_plan', 'view']],
+                ['label' => 'Rencana Konten', 'route' => 'content-plan.index', 'spa' => true, 'icon' => 'event_note', 'permission' => ['content_plan', 'view']],
                 ['label' => 'Produksi', 'route' => 'production-workflow.index', 'icon' => 'folder_open', 'permission' => ['workflow', 'view']],
             ],
         ],
         [
             'label' => 'Tim',
             'items' => [
-                ['label' => 'Performa Tim', 'route' => 'team-performance.index', 'icon' => 'diversity_3', 'permission' => ['team_performance', 'view']],
-                ['label' => 'Kelola Pengguna', 'route' => 'user-management.index', 'icon' => 'manage_accounts', 'permission' => ['user_management', 'view']],
+                ['label' => 'Performa Tim', 'route' => 'team-performance.index', 'spa' => true, 'icon' => 'diversity_3', 'permission' => ['team_performance', 'view']],
+                ['label' => 'Kelola Pengguna', 'route' => 'user-management.index', 'spa' => true, 'icon' => 'manage_accounts', 'permission' => ['user_management', 'view']],
             ],
         ],
         [
@@ -38,6 +38,7 @@
                 [
                     'label' => 'Kelola Klien',
                     'route' => 'client-management.index',
+                    'spa' => true,
                     'icon' => 'apartment',
                     'permission' => ['client', 'view'],
                     'visible' => fn ($user) => $user->hasPermissionTo('client', 'manage') || $user->canSeeAllClients(),
@@ -86,7 +87,7 @@
     class="fixed inset-0 bg-[#14181a]/40 z-30 lg:hidden"
     @click="sidebarOpen = false"></div>
 
-<aside x-data="{
+<aside data-app-sidebar x-data="{
         collapsed: (localStorage.getItem('sidebar-collapsed') === 'true'),
         isDesktop: window.matchMedia('(min-width: 1024px)').matches,
         get effectiveCollapsed() { return this.collapsed && this.isDesktop },
@@ -118,6 +119,7 @@
         },
     }"
     x-init="
+        $el.setAttribute('data-ready', '');
         window.matchMedia('(min-width: 1024px)').addEventListener('change', (e) => { isDesktop = e.matches });
         $watch('collapsed', value => {
             localStorage.setItem('sidebar-collapsed', value);
@@ -165,6 +167,10 @@
                         @endphp
                         <a href="{{ Route::has($item['route']) ? route($item['route']) : '#' }}"
                             aria-label="{{ $item['label'] }}"
+                            @if (Route::has($item['route']))
+                                data-nav-path="{{ parse_url(route($item['route']), PHP_URL_PATH) }}"
+                            @endif
+                            @if (! empty($item['spa'])) data-spa @endif
                             x-data="{ label: {{ Illuminate\Support\Js::from($item['label']) }} }"
                             @mouseenter="{{ $tooltipEnter }}"
                             @mouseleave="tooltip.show = false"
