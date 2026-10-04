@@ -14,6 +14,14 @@
         <x-next-steps :steps="$nextSteps" />
     </div>
 
-    @include('partials.user-work-summary')
+    @if ($briefQueueItems !== null)
+        <div class="{{ $showProductionSummary ? 'mb-6' : '' }}">
+            @include('partials.copywriter-brief-queue')
+        </div>
+    @endif
+
+    @if ($showProductionSummary)
+        @include('partials.user-work-summary')
+    @endif
 </div>
 @endsection

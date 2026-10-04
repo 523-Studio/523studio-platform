@@ -1,6 +1,6 @@
 {{-- Shared "Brief Belum Final" queue body for the copywriter role.
-     Used by home/index-copywriter and profile/show-copywriter.
-     Expects: $briefQueueItems --}}
+     Used by home/index (when $briefQueueItems isn't null) and
+     profile/show-copywriter. Expects: $briefQueueItems --}}
 @php
     // Sama seperti user-work-summary.blade.php - pin cuma boleh diutak-atik
     // di Beranda sendiri atau profil sendiri.

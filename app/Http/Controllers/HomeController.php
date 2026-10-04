@@ -41,19 +41,25 @@ class HomeController extends Controller
             'lateMinutes' => $attendance ? $attendanceService->lateMinutes($attendance) : 0,
         ];
 
-        if ($summaryService->isCopywriter($user)) {
-            $briefQueueItems = $summaryService->copywriterQueue($user, $pinnedIds);
+        // Dua panel ini aditif, bukan eksklusif: user yang Copywriter SEKALIGUS
+        // punya role lain (misal Content Creator) harus lihat berdua-duanya,
+        // nggak cuma antrean brief doang kayak sebelumnya.
+        $briefQueueItems = $summaryService->isCopywriter($user)
+            ? $summaryService->copywriterQueue($user, $pinnedIds)
+            : null;
 
-            return view('home.index-copywriter', array_merge(
-                compact('user', 'briefQueueItems', 'nextSteps', 'pinnedIds', 'pinnedItems'),
-                $attendanceProps
-            ));
-        }
-
-        $data = $summaryService->productionSummary($user, $pinnedIds);
+        $showProductionSummary = $summaryService->hasNonCopywriterRole($user);
+        $data = $showProductionSummary ? $summaryService->productionSummary($user, $pinnedIds) : [];
 
         return view('home.index', array_merge(
-            ['user' => $user, 'nextSteps' => $nextSteps, 'pinnedIds' => $pinnedIds, 'pinnedItems' => $pinnedItems],
+            [
+                'user' => $user,
+                'nextSteps' => $nextSteps,
+                'pinnedIds' => $pinnedIds,
+                'pinnedItems' => $pinnedItems,
+                'briefQueueItems' => $briefQueueItems,
+                'showProductionSummary' => $showProductionSummary,
+            ],
             $data,
             $attendanceProps
         ));

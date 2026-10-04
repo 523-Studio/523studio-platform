@@ -25,6 +25,20 @@ class UserWorkSummaryService
     }
 
     /**
+     * True kalau user punya role produksi di luar Copywriter (termasuk user
+     * multi-role yang Copywriter + role lain). Dipakai Beranda buat tahu
+     * perlu nggak nampilin ringkasan produksi SELAIN antrean brief -
+     * sebelumnya dua tampilan ini eksklusif (if/else), jadi role kedua di
+     * user multi-role nggak pernah kelihatan tugasnya di Beranda.
+     */
+    public function hasNonCopywriterRole(User $user): bool
+    {
+        return $user->roles->pluck('name')->reject(
+            fn (string $name) => $name === UserRole::Copywriter->value
+        )->isNotEmpty();
+    }
+
+    /**
      * Copywriter tidak jadi PIC produksi, jadi ringkasannya bukan papan
      * produksi biasa - melainkan antrean brief yang belum final. Dibatasi
      * ke client yang ada di roster $user (bukan global) - konsisten sama
