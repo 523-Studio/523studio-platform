@@ -542,7 +542,7 @@
                                 <div class="bg-[var(--warning-tint)] rounded-lg p-3 mb-3 flex items-start gap-2.5">
                                     <span class="material-symbols-outlined text-[var(--warning-text)] text-[16px] mt-0.5">group</span>
                                     <div class="flex-1">
-                                        <p class="text-xs text-[var(--warning-text)] mb-2">Penanggung Jawab saat ini sedang menangani banyak task aktif. Pertimbangkan reassign ke yang lebih longgar.</p>
+                                        <p class="text-xs text-[var(--warning-text)] mb-2">Penanggung Jawab saat ini punya banyak konten lain dengan deadline di minggu yang sama. Pertimbangkan reassign ke yang lebih longgar.</p>
                                         @if ($canUpdateWorkflow)
                                             <button type="button" @click="showReassignModal = true"
                                                     class="inline-flex items-center gap-1 bg-[var(--warning-solid)] text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-[var(--warning-dark)] transition-colors">

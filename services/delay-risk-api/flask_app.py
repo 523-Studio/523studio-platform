@@ -17,6 +17,34 @@ FEATURE_COLUMNS = [
     "days_in_current_status",
 ]
 
+# Model dilatih dengan nama kategori dan pilar versi data historis
+# (huruf kecil untuk pilar, CORPORATE/INSTITUSI untuk kategori), sedangkan
+# master data sistem memakai "Hard Selling", "Korporat", "Institusi".
+# OneHotEncoder(handle_unknown='ignore') diam-diam mengabaikan nama yang
+# tidak dikenal, jadi nama dari sistem harus diterjemahkan dulu ke nama
+# yang dikenal model. Kategori yang memang tidak ada di data latih
+# (mis. Startup, Retail) tetap tidak dikenal model.
+CATEGORY_TO_MODEL = {
+    "umkm": "UMKM",
+    "korporat": "CORPORATE",
+    "corporate": "CORPORATE",
+    "institusi": "INSTITUSI",
+}
+
+
+def normalize_category(value):
+    if value is None:
+        return value
+    key = str(value).strip().lower()
+    return CATEGORY_TO_MODEL.get(key, str(value).strip())
+
+
+def normalize_pillar(value):
+    if value is None:
+        return value
+    return str(value).strip().lower()
+
+
 # PythonAnywhere mengimpor `app` dari file ini sebagai WSGI application
 # (lihat file WSGI config yang di-generate otomatis saat setup web app Flask
 # di tab Web hPanel PythonAnywhere).
@@ -44,7 +72,9 @@ def predict():
         return jsonify([])
 
     df = pd.DataFrame(items)
-    X = df[FEATURE_COLUMNS]
+    X = df[FEATURE_COLUMNS].copy()
+    X["client_category"] = X["client_category"].map(normalize_category)
+    X["pillar"] = X["pillar"].map(normalize_pillar)
 
     model = get_model()
     probabilities = model.predict_proba(X)[:, 1]

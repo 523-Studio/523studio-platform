@@ -8,6 +8,7 @@ use App\Models\ContentItem;
 use App\Models\ContentItemAssignment;
 use App\Models\ContentPlan;
 use App\Models\ContentWorkflow;
+use App\Models\DelayRiskScore;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
@@ -175,5 +176,30 @@ class ContentItemDetailTest extends TestCase
         ]);
 
         $response->assertForbidden();
+    }
+
+    // ===== Saran reassign Delay Risk =====
+
+    public function test_workload_risk_suggestion_describes_same_week_deadlines(): void
+    {
+        $client = $this->client();
+        $pic = $this->userWithRole('workflow', 'update', $client);
+        $item = $this->itemFor($client, $pic);
+
+        DelayRiskScore::create([
+            'content_item_id' => $item->id,
+            'risk_score' => 80,
+            'risk_level' => 'high',
+            'top_factor' => 'Beban kerja PIC sedang tinggi',
+            'features_snapshot' => [],
+        ]);
+
+        $response = $this->actingAs($pic)->get(route('content-items.show', $item));
+
+        $response->assertOk();
+        // Beban kerja di Delay Risk = konten lain ber-deadline di minggu yang
+        // sama, bukan jumlah task aktif.
+        $response->assertSee('punya banyak konten lain dengan deadline di minggu yang sama');
+        $response->assertDontSee('sedang menangani banyak task aktif');
     }
 }

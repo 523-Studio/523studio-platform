@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Enums\UserRole;
 use App\Models\ContentItem;
-use App\Models\ContentItemAssignment;
 use App\Models\ContentRevision;
 use App\Models\ContentStatusLog;
 use App\Models\ContentWorkflow;
@@ -13,6 +12,7 @@ use App\Models\Notification;
 use App\Models\User;
 use App\Support\ContentComplexityCalculator;
 use App\Support\WorkflowTransitions;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Carbon;
@@ -20,6 +20,15 @@ use Illuminate\Support\Carbon;
 class DelayRiskPredictionService
 {
     private array $doneStatuses = WorkflowTransitions::DONE_STATUSES;
+
+    /**
+     * Versi makna fitur, disimpan di features_snapshot (TIDAK ikut dikirim
+     * ke API). Versi 1 (snapshot lama, tanpa key ini): workload = jumlah task
+     * aktif PIC. Versi 2: workload = konten lain milik PIC yang ber-deadline
+     * di minggu yang sama. Angka workload dari versi berbeda tidak bisa
+     * dibandingkan - lihat guessTopFactor().
+     */
+    private const FEATURE_VERSION = 2;
 
     /**
      * @return int Jumlah item yang berhasil dapat skor baru (dipakai RecomputeDelayRiskScores
@@ -64,7 +73,7 @@ class DelayRiskPredictionService
                 'risk_score' => $result['risk_score'],
                 'risk_level' => $result['risk_level'],
                 'top_factor' => $this->guessTopFactor($featureMap[$result['content_item_id']], $previousFeatures, $result['risk_level']),
-                'features_snapshot' => $featureMap[$result['content_item_id']],
+                'features_snapshot' => $featureMap[$result['content_item_id']] + ['feature_version' => self::FEATURE_VERSION],
             ]);
 
             if ($score->risk_level === 'high') {
@@ -122,12 +131,7 @@ class DelayRiskPredictionService
             $item->contentType->name ?? 'Video'
         );
 
-        $currentPicId = $workflow->current_pic_id;
-        $workload = $currentPicId
-            ? ContentItemAssignment::where('user_id', $currentPicId)
-                ->whereHas('contentItem.workflow', fn($q) => $q->whereNotIn('current_status', \App\Support\WorkflowTransitions::INACTIVE_STATUSES))
-                ->count()
-            : 0;
+        $workload = $this->workloadPicSameWeek($item, $workflow->current_pic_id);
 
         $revisionCount = ContentRevision::where('content_item_id', $item->id)->count();
 
@@ -151,6 +155,36 @@ class DelayRiskPredictionService
         ];
     }
 
+    /**
+     * Makna fitur ini mengikuti data latih model: jumlah konten LAIN milik PIC
+     * yang sama dengan deadline pengerjaan di minggu kalender yang sama
+     * (Senin 00:00 sampai Minggu 23:59:59, zona waktu aplikasi), semua status
+     * kecuali cancelled. BUKAN "jumlah task aktif PIC saat ini".
+     *
+     * "Milik PIC yang sama" = punya ContentItemAssignment (peran apa pun)
+     * dengan user_id = current_pic_id item ini.
+     *
+     * null (bukan 0) kalau item tidak punya PIC atau deadline - pipeline model
+     * mengisinya dengan median, sedangkan 0 berarti "tidak ada konten lain
+     * minggu itu".
+     */
+    private function workloadPicSameWeek(ContentItem $item, ?int $picId): ?int
+    {
+        if (! $picId || ! $item->deadline_at) {
+            return null;
+        }
+
+        $weekStart = $item->deadline_at->copy()->startOfWeek(Carbon::MONDAY);
+        $weekEnd = $item->deadline_at->copy()->endOfWeek(Carbon::SUNDAY);
+
+        return ContentItem::query()
+            ->whereKeyNot($item->id)
+            ->whereBetween('deadline_at', [$weekStart, $weekEnd])
+            ->whereHas('assignments', fn ($q) => $q->where('user_id', $picId))
+            ->whereDoesntHave('workflow', fn ($q) => $q->where('current_status', 'cancelled'))
+            ->count();
+    }
+
     private function callPredictApi(array $items): array
     {
         $url = config('services.delay_risk.url');
@@ -160,9 +194,18 @@ class DelayRiskPredictionService
             return [];
         }
 
-        $response = Http::withHeaders(['X-Api-Key' => config('services.delay_risk.key')])
-            ->timeout(30)
-            ->post($url, ['items' => $items]);
+        // API tidak bisa dihubungi/timeout melempar ConnectionException, BUKAN
+        // respons gagal - tanpa ditangkap, pemanggil sinkron (reassign PIC,
+        // pindah status ke brief_ready) ikut 500 padahal aksi utamanya sudah
+        // tersimpan. Perlakukan sama seperti respons gagal: log, lewati skor.
+        try {
+            $response = Http::withHeaders(['X-Api-Key' => config('services.delay_risk.key')])
+                ->timeout(30)
+                ->post($url, ['items' => $items]);
+        } catch (ConnectionException $e) {
+            Log::error('Delay Risk prediction API tidak bisa dihubungi', ['error' => $e->getMessage()]);
+            return [];
+        }
 
         if ($response->failed()) {
             Log::error('Delay Risk prediction API failed', ['error' => $response->body()]);
@@ -206,9 +249,15 @@ class DelayRiskPredictionService
             if ($features['revision_count'] > $previousFeatures['revision_count']) {
                 return "Revisi bertambah dari {$previousFeatures['revision_count']} ke {$features['revision_count']} ronde";
             }
-            if ($features['workload_pic_same_week'] > $previousFeatures['workload_pic_same_week']
+            // workload bisa null (item tanpa PIC/deadline) - tanpa angka di
+            // kedua sisi tidak ada "naik" yang bisa diklaim. Sama halnya kalau
+            // skor sebelumnya dihitung dengan makna workload yang lama.
+            if (($previousFeatures['feature_version'] ?? 1) === self::FEATURE_VERSION
+                && $features['workload_pic_same_week'] !== null
+                && ($previousFeatures['workload_pic_same_week'] ?? null) !== null
+                && $features['workload_pic_same_week'] > $previousFeatures['workload_pic_same_week']
                 && $features['workload_pic_same_week'] > 5) {
-                return "Beban kerja PIC naik dari {$previousFeatures['workload_pic_same_week']} ke {$features['workload_pic_same_week']} task aktif";
+                return "Beban kerja PIC naik dari {$previousFeatures['workload_pic_same_week']} ke {$features['workload_pic_same_week']} konten ber-deadline minggu ini";
             }
             if ($features['current_status'] === $previousFeatures['current_status']
                 && $features['days_in_current_status'] > $previousFeatures['days_in_current_status']
@@ -228,10 +277,10 @@ class DelayRiskPredictionService
         $days = (int) round($features['days_in_current_status']);
         $candidates = [
             [
-                'ratio' => $features['workload_pic_same_week'] / 8,
+                'ratio' => ($features['workload_pic_same_week'] ?? 0) / 8,
                 'label' => 'beban kerja PIC',
                 'signifikan' => 'Beban kerja PIC sedang tinggi',
-                'belum' => "Beban kerja PIC ({$features['workload_pic_same_week']} task aktif) - belum mengkhawatirkan",
+                'belum' => "Beban kerja PIC ({$features['workload_pic_same_week']} konten lain ber-deadline minggu ini) - belum mengkhawatirkan",
             ],
             [
                 'ratio' => $features['revision_count'] / 2,
