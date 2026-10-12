@@ -13,8 +13,11 @@ use Tests\TestCase;
 /**
  * TeamClientSeeder menggantikan ContentPlannerSeeder/
  * ContentPlannerPrerequisiteSeeder untuk instalasi baru - hanya membawa
- * roster staf + Client asli dari data lama, TANPA histori Content Plan/
- * Content Item sama sekali.
+ * Client asli yang masih aktif, TANPA histori Content Plan/Content Item
+ * sama sekali.
+ *
+ * Roster staf SENGAJA kosong di fixture: akun didaftarkan manual lewat
+ * Kelola Pengguna, bukan pre-seeded pakai Gmail pribadi dev.
  */
 class TeamClientSeederTest extends TestCase
 {
@@ -31,27 +34,34 @@ class TeamClientSeederTest extends TestCase
     {
         $this->seedTeamAndClients();
 
-        $this->assertSame(14, Client::count());
+        $this->assertSame(9, Client::count());
         $this->assertTrue(Client::where('name', 'Top Scorer Arena')->exists());
+        $this->assertTrue(Client::where('name', 'Metro Indonesian Software')->exists());
 
         $this->assertSame(0, \App\Models\ContentPlan::count());
         $this->assertSame(0, \App\Models\ContentItem::count());
     }
 
-    public function test_seeds_team_roster_with_roles_and_client_assignments(): void
+    public function test_excludes_clients_that_are_no_longer_active(): void
     {
         $this->seedTeamAndClients();
 
-        $admin = User::where('email', 'ahdaalamin2506@gmail.com')->firstOrFail();
-        $this->assertTrue($admin->roles->pluck('name')->contains('Admin'));
+        foreach (['Oleo', 'Tatitatu', 'Alfa Sport', 'Odamilk', 'Labertha', 'Indonesian Software'] as $name) {
+            $this->assertFalse(Client::where('name', $name)->exists(), "Client '{$name}' tidak boleh ikut di-seed.");
+        }
+    }
 
-        $ceo = User::where('email', 'surdik2811@gmail.com')->firstOrFail();
-        $this->assertTrue($ceo->roles->pluck('name')->contains('CEO'));
-        $this->assertTrue($ceo->assignedClients->pluck('name')->contains('Top Scorer Arena'));
+    public function test_does_not_preseed_any_staff_account(): void
+    {
+        (new RoleSeeder)->run();
+        (new MasterDataSeeder)->run();
+        // RoleSeeder sudah membuat akun CEO - yang diuji di sini hanya bahwa
+        // TeamClientSeeder tidak menambah akun apa pun di atasnya.
+        $usersBefore = User::count();
 
-        $staff = User::where('email', 'hagisiraj123@gmail.com')->firstOrFail();
-        $this->assertFalse((bool) $staff->login_enabled);
-        $this->assertTrue($staff->assignedClients->pluck('name')->contains('Odamilk'));
+        (new TeamClientSeeder)->run();
+
+        $this->assertSame($usersBefore, User::count());
     }
 
     public function test_excludes_testing_only_and_duplicate_accounts(): void
@@ -67,7 +77,7 @@ class TeamClientSeederTest extends TestCase
         $this->seedTeamAndClients();
         (new TeamClientSeeder)->run();
 
-        $this->assertSame(14, Client::count());
-        $this->assertSame(1, User::where('email', 'surdik2811@gmail.com')->count());
+        $this->assertSame(9, Client::count());
+        $this->assertSame(1, Client::where('name', 'Top Scorer Arena')->count());
     }
 }
